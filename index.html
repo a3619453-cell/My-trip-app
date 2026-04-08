@@ -59,6 +59,8 @@
     .type-selector { display: flex; gap: 6px; margin-bottom: 20px; }
     .type-btn { flex: 1; padding: 10px 4px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.6); border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .type-btn.active { border-color: var(--primary-blue); background: #ffffff; color: var(--primary-blue); }
+    /* ✨ 修復分類圖案過大的問題 */
+    .type-btn svg { width: 24px; height: 24px; stroke-width: 1.5px; flex-shrink: 0; }
 
     .transit-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background-color: rgba(255,255,255,0.7); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 8px; font-size: 12px; font-weight: 600; margin-top: 4px; }
 
@@ -78,8 +80,8 @@
     .view { display: none; padding: 24px 20px; max-width: 760px; margin: 0 auto; }
     .view.active { display: block; animation: fadeIn 0.4s forwards; }
 
-    header { background: rgba(248, 250, 252, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; height: 64px; border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
-    .header-title { font-size: 17px; font-weight: 600; margin: 0; flex-grow: 1; text-align: center; }
+    header { background: rgba(248, 250, 252, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; height: 64px; border-bottom: 1px solid rgba(255, 255, 255, 0.5); gap: 8px;}
+    .header-title { font-size: 17px; font-weight: 600; margin: 0; flex-grow: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
     .project-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; opacity: 0; animation: slideInUp 0.5s forwards; }
     .project-info h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: 600; }
@@ -91,18 +93,16 @@
     .date-tab { flex-shrink: 0; white-space: nowrap; padding: 10px 20px; border-radius: 999px; background: rgba(255,255,255,0.6); color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--glass-border); opacity: 0; animation: popIn 0.4s forwards; display: flex; align-items: center; gap: 6px; }
     .date-tab.active { background-color: rgba(255,255,255,0.95); color: var(--primary); border-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-    /* 景點卡片與捷運連線修復 */
     .day-content { padding-top: 32px; padding-bottom: 80px;}
     .place-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative; opacity: 0; animation: slideInUp 0.5s forwards; }
     
-    /* ✨ 修復破圖：用 top: 100% 精準定位 */
     .place-card::after { 
       content: ''; 
       position: absolute; 
-      top: 100%;       /* 緊貼卡片底部邊緣 */
-      left: 41px;      /* 對齊圖示正中央 */
+      top: 100%;       
+      left: 41px;      
       width: 2px; 
-      height: 16px;    /* 高度等於 margin-bottom */
+      height: 16px;    
       background: rgba(148, 163, 184, 0.5); 
       z-index: 1;      
     }
@@ -129,10 +129,8 @@
     .modal-content { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(24px); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 32px 24px; border: 1px solid var(--glass-border); box-sizing: border-box; transform: translateY(100%); transition: 0.4s; }
     .modal-overlay.active .modal-content { transform: translateY(0); }
     
-    /* 拖曳時的視覺反饋 */
     .sortable-ghost { opacity: 0.4; transform: scale(0.98); }
     
-    /* 地圖區塊 */
     .embedded-map { margin-top: 16px; border-radius: 12px; overflow: hidden; height: 180px; border: 1px solid var(--glass-border); margin-left: 58px; }
   </style>
 </head>
@@ -159,10 +157,17 @@
     <header style="margin: 0 -20px; padding: 12px 20px;">
       <button class="icon-btn" onclick="goBack()" style="margin-left:-8px;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></button>
       <h1 class="header-title" id="detail-header-title">行程明細</h1>
-      <button id="btn-toggle-edit" class="icon-btn" onclick="toggleEditMode()" style="margin-right:-8px;">
-        <svg id="icon-lock" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-        <svg id="icon-unlock" style="display:none; color:#10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-      </button>
+      
+      <div style="display:flex; align-items:center;">
+        <!-- 新增分享按鈕 -->
+        <button id="btn-share" class="icon-btn edit-only" onclick="shareTrip()" title="邀請共同編輯" style="margin-right:4px;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+        </button>
+        <button id="btn-toggle-edit" class="icon-btn" onclick="toggleEditMode()" style="margin-right:-8px;">
+          <svg id="icon-lock" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+          <svg id="icon-unlock" style="display:none; color:#10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+        </button>
+      </div>
     </header>
     <div class="date-scroll-wrapper"><div class="date-tabs" id="date-tabs-container"></div></div>
     
@@ -194,12 +199,12 @@
     // ☁️ 1. 填入你的 Firebase 設定
     // ==========================================
     const firebaseConfig = {
-  apiKey: "AIzaSyDb8pnjqIZEOwIqAvYp4okzE9z7czZMR9o",
-  authDomain: "mytripapp-50159.firebaseapp.com",
-  projectId: "mytripapp-50159",
-  storageBucket: "mytripapp-50159.firebasestorage.app",
-  messagingSenderId: "165889240432",
-  appId: "1:165889240432:web:f2e42d74126283500c73b5",
+      apiKey: "請在此貼上你的_apiKey",
+      authDomain: "請在此貼上你的_authDomain",
+      projectId: "請在此貼上你的_projectId",
+      storageBucket: "請在此貼上你的_storageBucket",
+      messagingSenderId: "請在此貼上你的_messagingSenderId",
+      appId: "請在此貼上你的_appId"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -210,31 +215,45 @@
     db.enablePersistence().catch(err => console.warn("離線模式未啟用", err));
 
     // ==========================================
-    // 🔐 2. 帳號登入系統與專屬資料庫
+    // 🔐 2. 帳號登入系統與專屬資料庫 (已修改為支援共同編輯)
     // ==========================================
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
       currentUser = user;
       if (user) {
-        // 登入成功：切換大頭貼，綁定專屬的資料庫監聽
         document.getElementById('btn-login').style.display = 'none';
         document.getElementById('user-avatar').style.display = 'block';
         document.getElementById('user-avatar').src = user.photoURL;
         document.getElementById('login-prompt').style.display = 'none';
         
+        // 檢查網址是否帶有邀請碼 (?invite=tripId)
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteId = urlParams.get('invite');
+        if (inviteId) {
+          try {
+            await db.collection("trips").doc(inviteId).update({
+              members: firebase.firestore.FieldValue.arrayUnion(user.uid)
+            });
+            alert("成功加入共同編輯行程！");
+            // 清除網址列的邀請碼
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch(e) {
+            console.error(e);
+            alert("加入失敗，可能是行程不存在或你已被移除。");
+          }
+        }
+
         if (dbUnsubscribe) dbUnsubscribe();
         
-        // ✨ 資料隔離：每個人只會看到自己 UID 底下的行程資料
-        dbUnsubscribe = db.collection("users").doc(user.uid).onSnapshot((doc) => {
-          if (doc.exists) {
-            appData = doc.data().dataArray || [];
-          } else {
-            appData = []; // 新帳號，空資料
-          }
+        // ✨ 新架構：從獨立的 trips 集合中，尋找 members 包含自己 UID 的行程
+        dbUnsubscribe = db.collection("trips").where("members", "array-contains", user.uid).onSnapshot((snapshot) => {
+          appData = [];
+          snapshot.forEach(doc => {
+            appData.push({ id: doc.id, ...doc.data() });
+          });
           renderProjectList();
           if (currentTripId) { renderDateTabs(); renderDayContent(); }
         });
       } else {
-        // 尚未登入：顯示登入按鈕，清空畫面
         document.getElementById('btn-login').style.display = 'block';
         document.getElementById('user-avatar').style.display = 'none';
         document.getElementById('login-prompt').style.display = 'block';
@@ -248,12 +267,14 @@
     function loginGoogle() { auth.signInWithPopup(provider).catch(err => alert("登入失敗: " + err.message)); }
     function logout() { if(confirm("確定要登出行程管理嗎？")) auth.signOut(); }
 
-    function saveData() { 
-      if (!currentUser) return alert("請先登入！");
-      db.collection("users").doc(currentUser.uid).set({ 
-        dataArray: appData,
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }); 
+    // 更新單一專案的儲存邏輯 (取代原本存整包的 saveData)
+    function saveCurrentTrip() { 
+      if (!currentUser || !currentTripId) return;
+      const trip = appData.find(t => t.id === currentTripId);
+      if (trip) {
+        // 使用 merge: true 保留 members 欄位不被覆蓋
+        db.collection("trips").doc(currentTripId).set(trip, { merge: true }); 
+      }
     }
 
     // ==========================================
@@ -286,6 +307,16 @@
 
     function goBack() { if (isEditMode) toggleEditMode(); document.getElementById('view-detail').classList.remove('active'); document.getElementById('view-list').classList.add('active'); currentTripId = null; renderProjectList(); }
 
+    function shareTrip() {
+      if (!currentTripId) return;
+      const shareUrl = `${window.location.origin}${window.location.pathname}?invite=${currentTripId}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("已複製邀請連結！將連結傳給朋友，他們點開並登入後即可共同編輯。");
+      }).catch(err => {
+        prompt("請複製以下連結給朋友：", shareUrl);
+      });
+    }
+
     function renderProjectList() {
       const container = document.getElementById('project-list-container'); container.innerHTML = '';
       if(!currentUser) return;
@@ -294,7 +325,9 @@
          return;
       }
       appData.forEach((trip, i) => {
-        container.innerHTML += `<div class="project-card glass-panel" style="animation-delay: ${i*0.05}s"><div style="flex-grow:1; cursor:pointer;" onclick="selectTrip('${trip.id}')"><div class="project-info"><h3>${trip.title}</h3><p>${trip.dateRange}</p></div></div><button class="action-icon danger" onclick="deleteTrip('${trip.id}')">${icons.trash}</button></div>`;
+        // 若 members 超過 1 人，顯示多人圖示提示
+        const isShared = trip.members && trip.members.length > 1 ? '👥 ' : '';
+        container.innerHTML += `<div class="project-card glass-panel" style="animation-delay: ${i*0.05}s"><div style="flex-grow:1; cursor:pointer;" onclick="selectTrip('${trip.id}')"><div class="project-info"><h3>${isShared}${trip.title}</h3><p>${trip.dateRange}</p></div></div><button class="action-icon danger" onclick="deleteTrip('${trip.id}')">${icons.trash}</button></div>`;
       });
       container.innerHTML += `<button class="btn btn-outline" style="width: 100%; padding: 14px; margin-top: 8px;" onclick="openModal('modal-trip')">+ 新增行程</button>`;
     }
@@ -320,7 +353,6 @@
       if(!day) return;
       
       day.places.forEach((place, index) => {
-        const isFirst = index === 0; const isLast = index === day.places.length - 1;
         const readonlyAttr = isEditMode ? '' : 'readonly';
         const resizeScript = `this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';`;
 
@@ -333,7 +365,6 @@
           if (info) transitHtml = `<div class="transit-badge">${info}</div>`;
         }
 
-        // 🗺️ 內建地圖：利用 Google Maps Embed 的免費 iframe 網址
         const embeddedMapHtml = (!isEditMode && place.name) ? `
           <div class="embedded-map">
             <iframe width="100%" height="100%" frameborder="0" style="border:0" 
@@ -369,36 +400,44 @@
       });
       setTimeout(() => { document.querySelectorAll('.note-area').forEach(el => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }, 10);
 
-      // 🖐️ 初始化拖曳功能
       if (sortableInstance) sortableInstance.destroy();
       if (isEditMode) {
         sortableInstance = new Sortable(container, {
           animation: 150,
-          handle: '.drag-handle', // 綁定拖曳把手
+          handle: '.drag-handle',
           ghostClass: 'sortable-ghost',
           onEnd: function (evt) {
-            // 當拖曳結束時，更新資料庫裡的陣列順序
             const item = day.places.splice(evt.oldIndex, 1)[0];
             day.places.splice(evt.newIndex, 0, item);
-            saveData();
-            renderDayContent(); // 重新渲染以確保線條顯示正確
+            saveCurrentTrip(); // 更新至資料庫
+            renderDayContent(); 
           }
         });
       }
     }
 
-    function updateVal(pid, key, val) { const p = appData.find(t=>t.id===currentTripId).days.find(d=>d.id===currentDayId).places.find(x=>x.id===pid); if(p){ p[key]=val; saveData(); } }
-    function deleteTrip(id) { if(confirm("確定刪除行程？")) { appData = appData.filter(t => t.id !== id); if(currentTripId===id) goBack(); saveData(); renderProjectList(); } }
+    function updateVal(pid, key, val) { const p = appData.find(t=>t.id===currentTripId).days.find(d=>d.id===currentDayId).places.find(x=>x.id===pid); if(p){ p[key]=val; saveCurrentTrip(); } }
+    
+    function deleteTrip(id) { 
+      if(confirm("確定從你的列表中移除此行程？(如果是共同編輯，其他人仍可看到)")) { 
+        // 改為只移除自己，若想做成徹底刪除可以用 db.collection("trips").doc(id).delete();
+        db.collection("trips").doc(id).update({
+           members: firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+        });
+        if(currentTripId === id) goBack(); 
+      } 
+    }
+    
     function addNewDay() {
       const trip = appData.find(t => t.id === currentTripId);
       let ds = "新天數";
       if (trip.days.length > 0) { const last = trip.days[trip.days.length - 1].date.split('/'); if (last.length === 2) { let d = new Date(new Date().getFullYear(), parseInt(last[0]) - 1, parseInt(last[1])); d.setDate(d.getDate() + 1); ds = `${d.getMonth() + 1}/${d.getDate()}`; } }
       const nid = `d_${Date.now()}`;
       trip.days.push({ id: nid, date: ds, label: `第${trip.days.length + 1}天`, places: [] });
-      currentDayId = nid; saveData(); renderDateTabs(); renderDayContent();
+      currentDayId = nid; saveCurrentTrip(); renderDateTabs(); renderDayContent();
     }
-    function removeCurrentDay() { if (confirm("確定刪除？")) { const trip = appData.find(t => t.id === currentTripId); trip.days = trip.days.filter(d => d.id !== currentDayId); trip.days.forEach((d, i) => d.label = `第${i+1}天`); currentDayId = trip.days.length > 0 ? trip.days[0].id : null; saveData(); renderDateTabs(); renderDayContent(); } }
-    function deletePlace(id) { if(confirm("確定刪除？")){ const d=appData.find(t=>t.id===currentTripId).days.find(x=>x.id===currentDayId); d.places=d.places.filter(p=>p.id!==id); saveData(); renderDayContent(); } }
+    function removeCurrentDay() { if (confirm("確定刪除？")) { const trip = appData.find(t => t.id === currentTripId); trip.days = trip.days.filter(d => d.id !== currentDayId); trip.days.forEach((d, i) => d.label = `第${i+1}天`); currentDayId = trip.days.length > 0 ? trip.days[0].id : null; saveCurrentTrip(); renderDateTabs(); renderDayContent(); } }
+    function deletePlace(id) { if(confirm("確定刪除？")){ const d=appData.find(t=>t.id===currentTripId).days.find(x=>x.id===currentDayId); d.places=d.places.filter(p=>p.id!==id); saveCurrentTrip(); renderDayContent(); } }
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
@@ -409,8 +448,18 @@
       if(!t||!s||!e) return alert("資訊不完整");
       const days=[]; let c=new Date(s); let i=1;
       while(c<=new Date(e)){ days.push({id:`d_${Date.now()}_${i}`, date:`${c.getMonth()+1}/${c.getDate()}`, label:`第${i}天`, places:[]}); c.setDate(c.getDate()+1); i++; }
-      appData.push({id:`t_${Date.now()}`, title:t, dateRange:`${s} 至 ${e}`, days});
-      saveData(); closeModal('modal-trip'); document.getElementById('trip-title').value=''; document.getElementById('trip-start').value=''; document.getElementById('trip-end').value='';
+      
+      const tid = `t_${Date.now()}`;
+      // 直接建立獨立文件，並把建立者加入 members
+      db.collection("trips").doc(tid).set({
+        title: t,
+        dateRange: `${s} 至 ${e}`,
+        days: days,
+        members: [currentUser.uid],
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      closeModal('modal-trip'); document.getElementById('trip-title').value=''; document.getElementById('trip-start').value=''; document.getElementById('trip-end').value='';
     }
 
     function saveNewPlace() {
@@ -418,7 +467,7 @@
       if(!n) return alert("請輸入名稱");
       const day = appData.find(t=>t.id===currentTripId).days.find(d=>d.id===currentDayId);
       day.places.push({ id: `p_${Date.now()}`, type: selectedType, name: n, trainNo: document.getElementById('place-train-no').value, time: document.getElementById('place-time').value, refUrl: document.getElementById('place-ref').value, note: document.getElementById('place-note').value });
-      saveData(); closeModal('modal-place');
+      saveCurrentTrip(); closeModal('modal-place');
       document.getElementById('place-name').value=''; document.getElementById('place-train-no').value=''; document.getElementById('place-time').value='';
       document.getElementById('place-ref').value=''; document.getElementById('place-note').value='';
       renderDayContent();
