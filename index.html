@@ -118,7 +118,16 @@
     .day-content { padding-top: 32px; padding-bottom: 80px;}
     .place-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative; opacity: 0; animation: slideInUp 0.5s forwards; }
     
-    .place-card::after { content: ''; position: absolute; top: 100%; left: 41px; width: 2px; height: 16px; background: rgba(148, 163, 184, 0.5); z-index: 1; }
+    .place-card::after { 
+      content: ''; 
+      position: absolute; 
+      top: calc(100% + 1px); 
+      left: 41px; 
+      width: 2px; 
+      height: 14px; 
+      background: rgba(148, 163, 184, 0.5); 
+      z-index: 1; 
+    }
     .place-card:last-child::after { display: none; }
 
     .place-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;}
