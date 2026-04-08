@@ -107,7 +107,21 @@
     .project-info h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: 600; }
     .project-info p { margin: 0; font-size: 13px; color: var(--text-muted); }
 
-    .date-scroll-wrapper { background: rgba(248, 250, 252, 0.75); position: sticky; top: 64px; z-index: 40; backdrop-filter: blur(20px); margin: -24px -20px 0 -20px; padding: 12px 0 0 0; border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
+    /* 修改日期區塊：移除底線，加上漸層羽化遮罩 */
+    .date-scroll-wrapper { 
+      background: rgba(248, 250, 252, 0.75); 
+      position: sticky; 
+      top: 64px; 
+      z-index: 40; 
+      backdrop-filter: blur(20px); 
+      margin: -24px -20px 0 -20px; 
+      /* 稍微增加下方的 padding，留給漸層消失的空間 */
+      padding: 12px 0 24px 0; 
+      
+      /* 核心魔法：讓底部的 25% 空間產生由不透明到全透明的漸層遮罩 */
+      -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+    }
     .date-tabs { display: flex; overflow-x: auto; gap: 12px; padding: 16px 20px 16px 20px; scrollbar-width: none; }
     .date-tabs::-webkit-scrollbar { display: none; }
 
