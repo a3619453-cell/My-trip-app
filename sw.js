@@ -3,6 +3,7 @@ const urlsToCache = [
   './',
   './index.html',
   './manifest.json'
+  './icon.png'
 ];
 
 // 安裝時進行快取
