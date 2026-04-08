@@ -1,102 +1,209 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <link rel="apple-touch-icon" href="./icon.PNG">
-  <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#0f172a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>行程管理系統</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon.png">
+  <link rel="icon" href="./icon.png">
+  <meta name="theme-color" content="#f8fafc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <style>
-    /* 旗艦版極簡美學設計 (Premium Minimalist SaaS) */
+    /* 旗艦版極簡美學 - 乾淨玻璃擬態 (Clean Glassmorphism) */
     :root {
-      --bg-body: #f9fafb; --bg-card: #ffffff; --text-main: #111827; --text-muted: #6b7280; --text-light: #9ca3af;
-      --border: #e5e7eb; --primary: #0f172a; --primary-blue: #3b82f6; --primary-blue-bg: #eff6ff; 
-      --primary-green: #10b981; --primary-green-bg: #ecfdf5; --danger: #ef4444; --danger-bg: #fef2f2;
-      --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      --shadow-active: 0 6px 12px -4px rgba(0, 0, 0, 0.08);
+      --text-main: #1e293b;     
+      --text-muted: #64748b;    
+      --text-light: #94a3b8;
+      --primary: #0f172a;       
+      --primary-blue: #3b82f6;  
+      --danger: #ef4444;
+      
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --radius-sm: 10px;
+      
+      /* 玻璃材質核心設定 */
+      --glass-bg: rgba(255, 255, 255, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+      --glass-blur: 20px;
     }
 
-    body { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-    
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+      color: var(--text-main);
+      margin: 0; padding: 0;
+      -webkit-font-smoothing: antialiased;
+      
+      /* 乾淨背景 */
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      background-attachment: fixed;
+    }
+
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      position: relative;
+      z-index: 5; /* 確保卡片在連線上方 */
+    }
+
+    /* === 動畫 === */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes popIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 
-    .btn { background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s ease; box-shadow: var(--shadow-sm); font-family: inherit; }
+    /* === UI 元件 === */
+    .btn {
+      background-color: var(--primary); color: white; border: none; padding: 12px 20px;
+      border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; 
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
     .btn:active { transform: scale(0.97); }
-    .btn-outline { background-color: var(--bg-card); color: var(--text-main); border: 1px dashed var(--text-light); }
-    .btn-danger-outline { background-color: transparent; color: var(--danger); border: 1px solid #fca5a5; width: 100%; padding: 12px; border-radius: var(--radius-sm); margin-top: 32px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: inherit; }
-
-    .icon-btn { background: transparent; border: none; color: var(--text-main); padding: 8px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-    .icon-btn:hover { background-color: rgba(0,0,0,0.05); }
+    .btn-outline { background-color: rgba(255,255,255,0.6); color: var(--text-main); border: 1px dashed var(--text-muted); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    
+    .icon-btn { background: transparent; border: none; color: var(--text-main); padding: 8px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease; }
     .icon-btn svg { width: 22px; height: 22px; stroke-width: 1.5px; }
 
-    .action-icon { background: var(--bg-body); border: 1px solid transparent; padding: 6px; border-radius: 6px; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
-    .action-icon:hover { background: var(--bg-card); border-color: var(--border); color: var(--text-main); }
-    .action-icon.danger:hover { color: var(--danger); border-color: #fca5a5; background: var(--danger-bg); }
+    .action-icon { background: rgba(255,255,255,0.6); border: 1px solid transparent; padding: 6px; border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
     .action-icon svg { width: 16px; height: 16px; stroke-width: 2px;}
 
-    .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; box-sizing: border-box; background-color: var(--bg-card); margin-bottom: 20px; font-family: inherit; transition: 0.2s; -webkit-appearance: none; }
-    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); }
+    .form-control {
+      width: 100%; padding: 12px 16px; border: 1px solid var(--glass-border); border-radius: var(--radius-sm);
+      font-size: 15px; box-sizing: border-box; background-color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;
+      font-family: inherit; transition: all 0.25s ease; color: var(--text-main);
+      -webkit-appearance: none; min-height: 46px; 
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
 
-    /* 分類切換按鈕組 */
-    .type-selector { display: flex; gap: 8px; margin-bottom: 20px; }
-    .type-btn { flex: 1; padding: 10px; border: 1px solid var(--border); background: var(--bg-card); border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
-    .type-btn svg { width: 20px; height: 20px; stroke-width: 2px; }
-    .type-btn.active { border-color: var(--primary); background: #f1f5f9; color: var(--primary); }
+    /* 分類切換按鈕 */
+    .type-selector { display: flex; gap: 6px; margin-bottom: 20px; }
+    .type-btn { flex: 1; padding: 10px 4px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.6); border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);}
+    .type-btn svg { width: 22px; height: 22px; stroke-width: 1.8px; }
+    .type-btn.active { border-color: var(--primary-blue); background: #ffffff; color: var(--primary-blue); box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
 
-    /* 交通資訊膠囊 */
-    .transit-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background-color: #f3f4f6; color: var(--text-muted); border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 4px; }
+    .transit-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background-color: rgba(255,255,255,0.7); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 8px; font-size: 12px; font-weight: 600; margin-top: 4px; }
 
-    .nav-circle-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; text-decoration: none; transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
-    .nav-circle-btn.map { background-color: var(--primary-blue-bg); color: var(--primary-blue); }
-    .nav-circle-btn.ref { background-color: var(--primary-green-bg); color: var(--primary-green); }
-    .nav-circle-btn svg { width: 18px; height: 18px; stroke-width: 2.2px; }
+    /* === 導航與連結按鈕 === */
+    .link-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .nav-circle-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      text-decoration: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--glass-border);
+    }
+    .nav-circle-btn.map { background-color: rgba(59, 130, 246, 0.15); color: var(--primary-blue); }
+    .nav-circle-btn.ref { background-color: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .nav-circle-btn svg { width: 18px; height: 18px; stroke-width: 2px; }
 
+    /* === 獨立色彩的圖示卡 === */
+    .icon-box {
+      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      position: relative; z-index: 10;
+    }
+    .icon-box svg { width: 22px; height: 22px; stroke-width: 1.8px; }
+    .icon-box.type-spot { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .icon-box.type-flight { background: rgba(14, 165, 233, 0.12); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.2); }
+    .icon-box.type-train { background: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.2); }
+    .icon-box.type-bus { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    /* === 視圖與佈局 === */
     .view { display: none; padding: 24px 20px; max-width: 760px; margin: 0 auto; }
     .view.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-    header { background-color: rgba(249, 250, 251, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; height: 64px; box-sizing: border-box; border-bottom: 1px solid rgba(229, 231, 235, 0.5); }
-    .header-title { font-size: 17px; font-weight: 600; margin: 0; flex-grow: 1; text-align: center; }
+    header {
+      background: rgba(248, 250, 252, 0.75);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50; height: 64px; box-sizing: border-box;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    .header-title { font-size: 17px; font-weight: 600; margin: 0; flex-grow: 1; text-align: center; letter-spacing: 0.3px; }
 
-    .project-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: 0.2s; opacity: 0; animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    /* 專案卡片 */
+    .project-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; opacity: 0; animation: slideInUp 0.5s forwards; }
+    .project-info h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: 600; }
+    .project-info p { margin: 0; font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
 
-    .date-scroll-wrapper { background-color: rgba(249, 250, 251, 0.85); position: sticky; top: 64px; z-index: 40; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); margin: -24px -20px 0 -20px; padding: 12px 0 0 0; border-bottom: 1px solid rgba(229, 231, 235, 0.8); }
+    /* ✨ 日期選單 (已修正擁擠問題) ✨ */
+    .date-scroll-wrapper { background: rgba(248, 250, 252, 0.75); position: sticky; top: 64px; z-index: 40; backdrop-filter: blur(20px); margin: -24px -20px 0 -20px; padding: 12px 0 0 0; border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
     .date-tabs { display: flex; overflow-x: auto; gap: 12px; padding: 8px 20px 16px 20px; scrollbar-width: none; }
     .date-tabs::-webkit-scrollbar { display: none; }
-    .date-tab { padding: 10px 20px; border-radius: 999px; background-color: var(--bg-card); color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; border: 1px solid var(--border); transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 6px; opacity: 0; animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .date-tab.active { background-color: #f1f5f9; color: var(--text-main); border-color: #e2e8f0; box-shadow: var(--shadow-active); transform: translateY(-1px); }
+    .date-tab { 
+      flex-shrink: 0; /* 關鍵：絕對不要壓縮我的寬度 */
+      white-space: nowrap; /* 關鍵：文字絕對不換行 */
+      padding: 10px 20px; 
+      border-radius: 999px; 
+      background: rgba(255,255,255,0.6); 
+      color: var(--text-muted); 
+      font-size: 13px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      border: 1px solid var(--glass-border); 
+      opacity: 0; 
+      animation: popIn 0.4s forwards; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+    }
+    .date-tab.active { background-color: rgba(255,255,255,0.95); color: var(--primary); border-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .date-tab.add-btn { background-color: transparent; border: 1px dashed var(--text-light); box-shadow: none; }
 
+    /* 景點卡片與捷運連線 */
     .day-content { padding-top: 32px; padding-bottom: 80px;}
-    .place-card { background-color: var(--bg-card); border: 1px solid transparent; border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); margin-bottom: 16px; position: relative; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .place-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px;}
-    .place-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px; color: var(--text-main); flex-grow: 1;}
-    .place-title-icon { color: var(--text-light); display: flex; align-items: center; }
+    .place-card {
+      border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative;
+      opacity: 0; animation: slideInUp 0.5s forwards;
+    }
+    
+    /* 捷運站點連線 (只出現在卡片之間的縫隙) */
+    .place-card::after {
+      content: '';
+      position: absolute;
+      bottom: -16px;   /* 剛好落在卡片下方 16px 的 margin */
+      left: 41px;      /* 對齊圖示中央 (20px padding + 22px 圖示半寬) */
+      width: 2px;
+      height: 16px;
+      background: rgba(148, 163, 184, 0.5);
+      z-index: -1;      /* 絕對確保在卡片圖層下方 */
+    }
+    .place-card:last-child::after { display: none; }
 
-    textarea.note-area { width: 100%; border: 1px solid transparent; background: transparent; padding: 0 0 0 30px; font-size: 14px; color: var(--text-muted); resize: none; min-height: 24px; font-family: inherit; transition: 0.3s ease; box-sizing: border-box; line-height: 1.5; }
+    .place-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;}
+    .place-title { display: flex; align-items: flex-start; gap: 14px; color: var(--text-main); flex-grow: 1;}
     
+    textarea.note-area {
+      width: 100%; border: 1px solid transparent; background: transparent; padding: 0 0 0 58px; 
+      font-size: 14px; color: var(--text-muted); resize: none; min-height: 24px; font-family: inherit; 
+      line-height: 1.5; margin-top: -4px;
+    }
+    
+    /* === 編輯模式 === */
     .edit-only { display: none !important; }
-    body.is-editing .edit-only { display: flex !important; animation: fadeIn 0.4s ease forwards; }
-    body.is-editing .edit-only-block { display: block !important; animation: fadeIn 0.4s ease forwards; }
-    body.is-editing .place-card { border-color: var(--border); }
-    body.is-editing textarea.note-area { background-color: var(--bg-body); border-color: var(--border); padding: 12px; border-radius: var(--radius-sm); min-height: 80px; color: var(--text-main); margin-top: 8px; }
+    body.is-editing .edit-only { display: flex !important; }
+    body.is-editing .edit-only-block { display: block !important; }
+    body.is-editing .place-card { border-color: rgba(255,255,255,1); background: rgba(255,255,255,0.8); }
+    body.is-editing textarea.note-area { background-color: rgba(255,255,255,0.6); border-color: var(--glass-border); padding: 12px; border-radius: var(--radius-sm); min-height: 80px; color: var(--text-main); margin-top: 12px; }
     
-    .url-input { display: none; width: 100%; border: 1px solid var(--border); background-color: var(--bg-body); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; box-sizing: border-box; margin-top: 8px; }
+    .url-edit-group { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-left: 58px; }
+    .url-input { display: none; width: 100%; border: 1px solid var(--glass-border); background-color: rgba(255,255,255,0.6); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; box-sizing: border-box; }
     body.is-editing .url-input { display: block; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: flex-end; z-index: 100; visibility: hidden; opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: flex-end; z-index: 100; visibility: hidden; opacity: 0; transition: all 0.4s; }
     .modal-overlay.active { visibility: visible; opacity: 1; }
-    .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 32px 24px; box-sizing: border-box; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: var(--shadow-float); }
+    .modal-content { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(24px); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 32px 24px; border: 1px solid var(--glass-border); box-sizing: border-box; transform: translateY(100%); transition: transform 0.4s; }
     .modal-overlay.active .modal-content { transform: translateY(0); }
-    @media (min-width: 600px) { .modal-overlay { align-items: center; } .modal-content { border-radius: var(--radius-lg); width: 90%; transform: translateY(30px) scale(0.95); } }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .modal-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
-    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -104,8 +211,8 @@
   <div id="view-list" class="view active">
     <header style="background:transparent; border:none; backdrop-filter:none; padding-left:0; padding-right:0;">
       <h1 class="header-title" style="text-align: left; font-size: 24px; font-weight: 700;">行程</h1>
-      <button class="icon-btn" onclick="openModal('modal-trip')" style="background:var(--bg-card); border:1px solid var(--border); box-shadow:var(--shadow-sm);">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      <button class="icon-btn glass-panel" onclick="openModal('modal-trip')" style="border-radius: var(--radius-sm);">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
       </button>
     </header>
     <div id="project-list-container" style="margin-top: 8px;"></div>
@@ -113,11 +220,11 @@
 
   <div id="view-detail" class="view" style="padding-top:0;">
     <header style="margin: 0 -20px; padding: 12px 20px;">
-      <button class="icon-btn" onclick="goBack()" style="margin-left:-8px;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></button>
+      <button class="icon-btn" onclick="goBack()" style="margin-left:-8px;"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg></button>
       <h1 class="header-title" id="detail-header-title">行程明細</h1>
       <button id="btn-toggle-edit" class="icon-btn" onclick="toggleEditMode()" style="margin-right:-8px;">
-        <svg id="icon-lock" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
-        <svg id="icon-unlock" style="display:none; color:var(--primary-green);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+        <svg id="icon-lock" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+        <svg id="icon-unlock" style="display:none; color:var(--primary-green);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
       </button>
     </header>
     <div class="date-scroll-wrapper"><div class="date-tabs" id="date-tabs-container"></div></div>
@@ -126,7 +233,6 @@
     <button class="btn-danger-outline edit-only edit-only-block" style="margin-top:0;" onclick="removeCurrentDay()">刪除此天行程</button>
   </div>
 
-  <!-- Modal: 新增專案 -->
   <div class="modal-overlay" id="modal-trip">
     <div class="modal-content">
       <div class="modal-header"><h3>建立新行程</h3><button class="icon-btn" onclick="closeModal('modal-trip')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div>
@@ -136,33 +242,24 @@
     </div>
   </div>
 
-  <!-- Modal: 新增景點或交通 -->
   <div class="modal-overlay" id="modal-place">
     <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
       <div class="modal-header"><h3>新增項目</h3><button class="icon-btn" onclick="closeModal('modal-place')"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></button></div>
-      
       <label class="form-label">分類</label>
       <div class="type-selector">
-        <button class="type-btn active" onclick="setPlaceType('spot')" id="btn-type-spot"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>景點</button>
-        <button class="type-btn" onclick="setPlaceType('train')" id="btn-type-train"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-12v.75m0 3v.75m0 3v.75m0 3V18M12 2.25C7.514 2.25 4.5 4.712 4.5 7.5v9c0 2.788 3.014 5.25 7.5 5.25s7.5-2.462 7.5-5.25v-9c0-2.788-3.014-5.25-7.5-5.25zM9 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>列車</button>
-        <button class="type-btn" onclick="setPlaceType('bus')" id="btn-type-bus"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m13.5 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-13.5 0H5.25m13.5 0h-1.5m-15-9.75V15a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 15V9a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9zm18 2.25H3"/></svg>巴士</button>
+        <button class="type-btn" onclick="setPlaceType('flight')" id="btn-type-flight"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.25c-1.243 0-2.25 1.007-2.25 2.25v6L3 14.25v2.25l6.75-2.25v4.5l-2.25 1.5v1.5l4.5-1.125 4.5 1.125v-1.5l-2.25-1.5v-4.5l6.75 2.25v-2.25l-6.75-3.75V4.5c0-1.243-1.007-2.25-2.25-2.25z"/></svg>飛機</button>
+        <button class="type-btn active" onclick="setPlaceType('spot')" id="btn-type-spot"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>景點</button>
+        <button class="type-btn" onclick="setPlaceType('train')" id="btn-type-train"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c0-3.3-2.7-6-6-6h-4c-3.3 0-6 2.7-6 6v4zm0-6h16M8 17l-2 4m10-4 2 4M12 5v4m-4 4h8"/></svg>列車</button>
+        <button class="type-btn" onclick="setPlaceType('bus')" id="btn-type-bus"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V7c0-2.2-1.8-4-4-4H8C5.8 3 4 4.8 4 7v8zm0-6h16M8 17v2M16 17v2M10 5h4m-7 8h.01M17 13h.01"/></svg>巴士</button>
       </div>
-
-      <label class="form-label" id="label-place-name">景點名稱</label>
-      <input type="text" id="place-name" class="form-control" placeholder="例如：一目千本櫻">
-
-      <!-- 列車專用欄位 -->
+      <label class="form-label">名稱</label><input type="text" id="place-name" class="form-control" placeholder="例如：成田機場、一目千本櫻">
       <div id="train-fields" style="display:none; gap:12px; margin-bottom: 20px;">
-        <div style="flex:1;"><label class="form-label">班次/車次</label><input type="text" id="place-train-no" class="form-control" placeholder="如：はやぶさ 5號"></div>
+        <div style="flex:1;"><label class="form-label">航班/車次</label><input type="text" id="place-train-no" class="form-control" placeholder="如：JX800"></div>
         <div style="flex:1;"><label class="form-label">時間</label><input type="time" id="place-time" class="form-control"></div>
       </div>
-
-      <label class="form-label">Google Maps 網址 (選填)</label>
-      <input type="text" id="place-map" class="form-control" placeholder="貼上地圖分享連結">
-      <label class="form-label">參考網址 (時刻表/官網)</label>
-      <input type="text" id="place-ref" class="form-control" placeholder="貼上網頁連結">
-      <label class="form-label">備註資訊</label>
-      <textarea id="place-note" class="form-control" style="min-height: 80px;"></textarea>
+      <label class="form-label">Google Maps 網址</label><input type="text" id="place-map" class="form-control" placeholder="貼上連結">
+      <label class="form-label">參考網址</label><input type="text" id="place-ref" class="form-control" placeholder="貼上連結">
+      <label class="form-label">備註資訊</label><textarea id="place-note" class="form-control" style="min-height: 80px;"></textarea>
       <button class="btn" style="width: 100%;" onclick="saveNewPlace()">加入行程</button>
     </div>
   </div>
@@ -171,21 +268,22 @@
     let appData = []; let currentTripId = null; let currentDayId = null; let isEditMode = false; let selectedType = 'spot';
 
     const icons = {
-      spot: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>',
-      train: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-12v.75m0 3v.75m0 3v.75m0 3V18M12 2.25C7.514 2.25 4.5 4.712 4.5 7.5v9c0 2.788 3.014 5.25 7.5 5.25s7.5-2.462 7.5-5.25v-9c0-2.788-3.014-5.25-7.5-5.25zM9 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>',
-      bus: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m13.5 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-13.5 0H5.25m13.5 0h-1.5m-15-9.75V15a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 15V9a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9zm18 2.25H3"/></svg>',
-      map: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 6.75V15m6-10.5V13.5m-9 1.5l.592 2.368a.75.75 0 00.728.518h11.36a.75.75 0 00.728-.518L20.25 15m-11.25 0l-3.382 1.127a.75.75 0 01-1.027-.706V6.143a.75.75 0 01.488-.701l3.921-1.425a.75.75 0 01.61 0l4.098 1.49a.75.75 0 00.543 0l3.921-1.425a.75.75 0 011.027.701V15"/></svg>',
-      link: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>',
-      trash: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>',
-      up: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>',
-      down: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>'
+      flight: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.25c-1.243 0-2.25 1.007-2.25 2.25v6L3 14.25v2.25l6.75-2.25v4.5l-2.25 1.5v1.5l4.5-1.125 4.5 1.125v-1.5l-2.25-1.5v-4.5l6.75 2.25v-2.25l-6.75-3.75V4.5c0-1.243-1.007-2.25-2.25-2.25z"/></svg>',
+      spot: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>',
+      train: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c0-3.3-2.7-6-6-6h-4c-3.3 0-6 2.7-6 6v4zm0-6h16M8 17l-2 4m10-4 2 4M12 5v4m-4 4h8"/></svg>',
+      bus: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 15c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V7c0-2.2-1.8-4-4-4H8C5.8 3 4 4.8 4 7v8zm0-6h16M8 17v2M16 17v2M10 5h4m-7 8h.01M17 13h.01"/></svg>',
+      map: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 11l19-9-9 19-2-8-8-2z"/></svg>',
+      link: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>',
+      trash: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>',
+      up: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>',
+      down: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>'
     };
 
     function init() {
       const saved = localStorage.getItem('tripPlanDataTypeV1');
       if (saved) { appData = JSON.parse(saved); } 
       else {
-        appData = [{ id: "t1", title: "範例：東北賞櫻", dateRange: "2026-04-13 至 04-15", days: [{ id: "d1", date: "4/13", label: "第1天", places: [{ id: "p1", type: "train", name: "搭機/列車", note: "發車班次", trainNo: "はやぶさ 5號", time: "10:30", mapUrl: "", refUrl: "" }] }] }];
+        appData = [{ id: "t1", title: "東北賞櫻", dateRange: "2026-04-13 至 2026-04-17", days: [{ id: "d1", date: "4/13", label: "第1天", places: [{ id: "p0", type: "flight", name: "桃園機場 飛往 成田機場", trainNo: "星宇 JX800", time: "08:30", mapUrl: "", refUrl: "", note: "第一航廈出發" }, { id: "p1", type: "spot", name: "一目千本櫻", note: "預計搭乘新幹線", mapUrl: "https://maps.app.goo.gl/example1", refUrl: "https://transit.yahoo.co.jp/" }] }] }];
         saveData();
       }
       renderProjectList();
@@ -196,8 +294,7 @@
       selectedType = type;
       document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(`btn-type-${type}`).classList.add('active');
-      document.getElementById('label-place-name').innerText = (type === 'spot') ? '景點名稱' : '目的地 / 路線名稱';
-      document.getElementById('train-fields').style.display = (type === 'train') ? 'flex' : 'none';
+      document.getElementById('train-fields').style.display = (['train', 'bus', 'flight'].includes(type)) ? 'flex' : 'none';
     }
 
     function toggleEditMode() {
@@ -221,7 +318,7 @@
     function renderProjectList() {
       const container = document.getElementById('project-list-container'); container.innerHTML = '';
       appData.forEach((trip, i) => {
-        container.innerHTML += `<div class="project-card" style="animation-delay: ${i*0.08}s"><div style="flex-grow:1; cursor:pointer;" onclick="selectTrip('${trip.id}')"><h3>${trip.title}</h3><p>${trip.dateRange}</p></div><button class="action-icon danger" onclick="deleteTrip('${trip.id}')">${icons.trash}</button></div>`;
+        container.innerHTML += `<div class="project-card glass-panel" style="animation-delay: ${i*0.08}s"><div style="flex-grow:1; cursor:pointer;" onclick="selectTrip('${trip.id}')"><div class="project-info"><h3>${trip.title}</h3><p>${trip.dateRange}</p></div></div><button class="action-icon danger" onclick="deleteTrip('${trip.id}')">${icons.trash}</button></div>`;
       });
     }
 
@@ -231,9 +328,10 @@
       trip.days.forEach((day, i) => {
         const tab = document.createElement('div'); tab.className = `date-tab ${day.id === currentDayId ? 'active' : ''}`;
         tab.style.animationDelay = `${i*0.05}s`; tab.innerHTML = `<span>${day.date}</span><span style="opacity:0.6; font-size:11px;">${day.label}</span>`;
-        tab.onclick = () => { if (currentDayId === day.id) return; currentDayId = day.id; Array.from(container.querySelectorAll('.date-tab')).forEach(t => t.classList.remove('active')); tab.classList.add('active'); renderDayContent(); tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); };
+        tab.onclick = () => { if (currentDayId === day.id) return; currentDayId = day.id; Array.from(container.querySelectorAll('.date-tab:not(.add-btn)')).forEach(t => t.classList.remove('active')); tab.classList.add('active'); renderDayContent(); tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); };
         container.appendChild(tab);
       });
+      const addTab = document.createElement('div'); addTab.className = 'date-tab add-btn edit-only'; addTab.innerText = '+ 新增一天'; addTab.onclick = addNewDay; container.appendChild(addTab);
     }
 
     function renderDayContent() {
@@ -244,32 +342,31 @@
       day.places.forEach((place, index) => {
         const isFirst = index === 0; const isLast = index === day.places.length - 1;
         const readonlyAttr = isEditMode ? '' : 'readonly';
-        
-        // 取得類型對應圖示
+        const resizeScript = `this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';`;
+
         const typeIcon = icons[place.type || 'spot'];
         const mapLink = (!isEditMode && place.mapUrl) ? `<a href="${place.mapUrl}" target="_blank" class="nav-circle-btn map">${icons.map}</a>` : '';
         const refLink = (!isEditMode && place.refUrl) ? `<a href="${place.refUrl}" target="_blank" class="nav-circle-btn ref">${icons.link}</a>` : '';
         
-        // 班次資訊
         let transitHtml = "";
-        if (place.type === 'train' || place.type === 'bus') {
+        if (['train', 'bus', 'flight'].includes(place.type)) {
           const info = [place.time, place.trainNo].filter(x => x).join(" ");
           if (info) transitHtml = `<div class="transit-badge">${info}</div>`;
         }
 
         container.innerHTML += `
-          <div class="place-card" style="animation-delay: ${index*0.08}s">
+          <div class="place-card glass-panel" style="animation-delay: ${index*0.08}s">
             <div class="place-header">
               <div class="place-title">
-                <div class="place-title-icon">${typeIcon}</div>
-                <div>
-                  <div style="font-size: 16px;">${place.name}</div>
+                <div class="icon-box type-${place.type || 'spot'}">${typeIcon}</div>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                  <div style="font-size: 16px; line-height:1.2;">${place.name}</div>
                   ${transitHtml}
                 </div>
               </div>
-              <div class="link-group" style="display:flex; gap:8px;">
+              <div class="link-group">
                 ${mapLink} ${refLink}
-                <div class="action-group edit-only">
+                <div class="action-group edit-only" style="display:flex; gap:6px;">
                   <button class="action-icon" onclick="movePlace('${place.id}', -1)" ${isFirst ? 'style="opacity:0.2;"' : ''}>${icons.up}</button>
                   <button class="action-icon" onclick="movePlace('${place.id}', 1)" ${isLast ? 'style="opacity:0.2;"' : ''}>${icons.down}</button>
                   <button class="action-icon danger" onclick="deletePlace('${place.id}')">${icons.trash}</button>
@@ -279,25 +376,40 @@
             
             <div class="url-edit-group">
                <input type="text" class="url-input" placeholder="名稱..." value="${place.name || ''}" onchange="updateVal('${place.id}', 'name', this.value)">
-               ${place.type === 'train' ? `<input type="text" class="url-input" placeholder="車次..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)">` : ''}
-               <input type="text" class="url-input" placeholder="Google Maps..." value="${place.mapUrl || ''}" onchange="updateVal('${place.id}', 'mapUrl', this.value)">
-               <input type="text" class="url-input" placeholder="參考連結..." value="${place.refUrl || ''}" onchange="updateVal('${place.id}', 'refUrl', this.value)">
+               ${(['train', 'bus', 'flight'].includes(place.type)) ? `<input type="text" class="url-input" placeholder="車次/航班..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)"><input type="time" class="url-input" value="${place.time || ''}" onchange="updateVal('${place.id}', 'time', this.value)">` : ''}
+               <input type="text" class="url-input" placeholder="Google Maps 網址..." value="${place.mapUrl || ''}" onchange="updateVal('${place.id}', 'mapUrl', this.value)">
+               <input type="text" class="url-input" placeholder="參考網址 (時刻表/官網)..." value="${place.refUrl || ''}" onchange="updateVal('${place.id}', 'refUrl', this.value)">
             </div>
-            <textarea class="note-area" placeholder="${isEditMode ? '備註...' : ''}" onchange="updateVal('${place.id}', 'note', this.value)" ${readonlyAttr} style="display: ${!isEditMode && !place.note ? 'none' : 'block'}">${place.note}</textarea>
+            <textarea class="note-area" placeholder="${isEditMode ? '點此新增備註...' : ''}" oninput="${resizeScript}" onchange="updateVal('${place.id}', 'note', this.value)" ${readonlyAttr} style="display: ${!isEditMode && !place.note ? 'none' : 'block'}">${place.note}</textarea>
           </div>`;
       });
+      setTimeout(() => { document.querySelectorAll('.note-area').forEach(el => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }); }, 10);
     }
 
     function updateVal(pid, key, val) { const p = appData.find(t=>t.id===currentTripId).days.find(d=>d.id===currentDayId).places.find(x=>x.id===pid); if(p){ p[key]=val; saveData(); } }
     function deleteTrip(id) { if(confirm("確定刪除？")) { appData = appData.filter(t => t.id !== id); if(currentTripId===id) goBack(); saveData(); renderProjectList(); } }
     function addNewDay() {
       const trip = appData.find(t => t.id === currentTripId);
-      let nid = `d_${Date.now()}`;
-      trip.days.push({ id: nid, date: "新日期", label: `第${trip.days.length + 1}天`, places: [] });
-      saveData(); renderDateTabs();
+      let ds = "新天數";
+      if (trip.days.length > 0) {
+        const last = trip.days[trip.days.length - 1].date.split('/');
+        if (last.length === 2) {
+          let d = new Date(new Date().getFullYear(), parseInt(last[0]) - 1, parseInt(last[1]));
+          d.setDate(d.getDate() + 1); ds = `${d.getMonth() + 1}/${d.getDate()}`;
+        }
+      }
+      const nid = `d_${Date.now()}`;
+      trip.days.push({ id: nid, date: ds, label: `第${trip.days.length + 1}天`, places: [] });
+      currentDayId = nid; saveData(); renderDateTabs(); renderDayContent();
     }
-    function removeCurrentDay() { if (confirm("確定刪除？")) { const trip = appData.find(t => t.id === currentTripId); trip.days = trip.days.filter(d => d.id !== currentDayId); currentDayId = trip.days[0]?.id; saveData(); renderDateTabs(); renderDayContent(); } }
-    function movePlace(pid, dir) { const d = appData.find(t=>t.id===currentTripId).days.find(x=>x.id===currentDayId); const i = d.places.findIndex(p=>p.id===pid); if (dir === -1 && i > 0) [d.places[i-1], d.places[i]] = [d.places[i], d.places[i-1]]; else if (dir === 1 && i < d.places.length-1) [d.places[i], d.places[i+1]] = [d.places[i+1], d.places[i]]; saveData(); renderDayContent(); }
+    function removeCurrentDay() { if (confirm("確定刪除？")) { const trip = appData.find(t => t.id === currentTripId); trip.days = trip.days.filter(d => d.id !== currentDayId); trip.days.forEach((d, i) => d.label = `第${i+1}天`); currentDayId = trip.days.length > 0 ? trip.days[0].id : null; saveData(); renderDateTabs(); renderDayContent(); } }
+    function movePlace(pid, dir) {
+      const day = appData.find(t=>t.id===currentTripId).days.find(x=>x.id===currentDayId);
+      const i = day.places.findIndex(p=>p.id===pid);
+      if (dir === -1 && i > 0) [day.places[i-1], day.places[i]] = [day.places[i], day.places[i-1]];
+      else if (dir === 1 && i < day.places.length-1) [day.places[i], day.places[i+1]] = [day.places[i+1], day.places[i]];
+      saveData(); renderDayContent();
+    }
     function deletePlace(id) { if(confirm("確定刪除？")){ const d=appData.find(t=>t.id===currentTripId).days.find(x=>x.id===currentDayId); d.places=d.places.filter(p=>p.id!==id); saveData(); renderDayContent(); } }
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }
@@ -317,34 +429,15 @@
       const n=document.getElementById('place-name').value;
       if(!n) return alert("請輸入名稱");
       const day = appData.find(t=>t.id===currentTripId).days.find(d=>d.id===currentDayId);
-      day.places.push({
-        id: `p_${Date.now()}`, type: selectedType, name: n,
-        trainNo: document.getElementById('place-train-no').value,
-        time: document.getElementById('place-time').value,
-        mapUrl: document.getElementById('place-map').value,
-        refUrl: document.getElementById('place-ref').value,
-        note: document.getElementById('place-note').value
-      });
+      day.places.push({ id: `p_${Date.now()}`, type: selectedType, name: n, trainNo: document.getElementById('place-train-no').value, time: document.getElementById('place-time').value, mapUrl: document.getElementById('place-map').value, refUrl: document.getElementById('place-ref').value, note: document.getElementById('place-note').value });
       saveData(); closeModal('modal-place');
       document.getElementById('place-name').value=''; document.getElementById('place-train-no').value=''; document.getElementById('place-time').value='';
       document.getElementById('place-map').value=''; document.getElementById('place-ref').value=''; document.getElementById('place-note').value='';
       renderDayContent();
     }
 
-     init();
-
- // 註冊 Service Worker 讓網頁可以離線使用
- if ('serviceWorker' in navigator) {
-   window.addEventListener('load', () => {
-     navigator.serviceWorker.register('./sw.js')
-       .then(registration => {
-         console.log('ServiceWorker 註冊成功，範圍為: ', registration.scope);
-       })
-       .catch(err => {
-         console.log('ServiceWorker 註冊失敗: ', err);
-       });
-   });
- }
+    init();
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); }
   </script>
 </body>
 </html>
