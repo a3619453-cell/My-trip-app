@@ -381,7 +381,8 @@
       selectedType = type;
       document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById(`btn-type-${type}`).classList.add('active');
-      document.getElementById('train-fields').style.display = (['train', 'bus', 'flight'].includes(type)) ? 'flex' : 'none';
+      // 下面這行的 'flex' 改為 'grid'
+      document.getElementById('train-fields').style.display = (['train', 'bus', 'flight'].includes(type)) ? 'grid' : 'none';
     }
 
     function toggleEditMode() {
@@ -487,7 +488,12 @@
             
             <div class="url-edit-group">
                <input type="text" class="url-input" placeholder="名稱 (會自動生成地圖)..." value="${place.name || ''}" onchange="updateVal('${place.id}', 'name', this.value)">
-               ${(['train', 'bus', 'flight'].includes(place.type)) ? `<input type="text" class="url-input" placeholder="車次/航班..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)"><input type="time" class="url-input" value="${place.time || ''}" onchange="updateVal('${place.id}', 'time', this.value)">` : ''}
+${(['train', 'bus', 'flight'].includes(place.type)) ? `
+   <div class="edit-row">
+      <input type="text" class="url-input" placeholder="車次/航班..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)">
+      <input type="time" class="url-input" value="${place.time || ''}" onchange="updateVal('${place.id}', 'time', this.value)">
+   </div>
+` : ''}
                <input type="text" class="url-input" placeholder="參考網址 (時刻表/官網)..." value="${place.refUrl || ''}" onchange="updateVal('${place.id}', 'refUrl', this.value)">
             </div>
             <textarea class="note-area" placeholder="${isEditMode ? '點此新增備註...' : ''}" oninput="${resizeScript}" onchange="updateVal('${place.id}', 'note', this.value)" ${readonlyAttr} style="display: ${!isEditMode && !place.note ? 'none' : 'block'}">${place.note}</textarea>
