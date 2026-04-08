@@ -268,25 +268,6 @@
       background: rgba(59, 130, 246, 0.08);
     }
     .map-toggle-btn svg { width: 14px; height: 14px; }
-    // 展開/收起地圖的切換邏輯 (全域綁定增強版)
-    window.toggleMap = function(btn) {
-      // 直接往上找父容器(卡片)，再往下精準鎖定地圖區塊，保證不抓錯
-      const mapDiv = btn.parentElement.querySelector('.embedded-map');
-      const span = btn.querySelector('span');
-      
-      if (!mapDiv) return; // 防呆機制，找不到地圖就不做事
-
-      // 判斷當下是否為隱藏狀態
-      if (mapDiv.style.display === 'none' || mapDiv.style.display === '') {
-        mapDiv.style.display = 'block';
-        span.innerText = '收起地圖';
-        btn.classList.add('active');
-      } else {
-        mapDiv.style.display = 'none';
-        span.innerText = '展開地圖';
-        btn.classList.remove('active');
-      }
-    };
   </style>
 </head>
 <body>
@@ -687,7 +668,23 @@ ${(['train', 'bus', 'flight'].includes(place.type)) ? `
       document.getElementById('place-ref').value=''; document.getElementById('place-note').value='';
       renderDayContent();
     }
+// 👇 把展開/收起地圖的切換邏輯貼在這裡 👇
+    window.toggleMap = function(btn) {
+      const mapDiv = btn.parentElement.querySelector('.embedded-map');
+      const span = btn.querySelector('span');
+      
+      if (!mapDiv) return;
 
+      if (mapDiv.style.display === 'none' || mapDiv.style.display === '') {
+        mapDiv.style.display = 'block';
+        span.innerText = '收起地圖';
+        btn.classList.add('active');
+      } else {
+        mapDiv.style.display = 'none';
+        span.innerText = '展開地圖';
+        btn.classList.remove('active');
+      }
+    };
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); }
   </script>
 </body>
