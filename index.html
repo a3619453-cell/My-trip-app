@@ -276,7 +276,8 @@
       
       <label class="form-label">名稱</label>
       <input type="text" id="place-name" class="form-control" placeholder="例如：成田機場、淺草寺">
-      
+      <label class="form-label" style="font-size: 13px;">精準地址/地標 (選填，修復地圖用)</label>
+      <input type="text" id="place-map-query" class="form-control" placeholder="若地圖抓錯，請在此填寫完整地址">
       <div id="train-fields" style="display:none; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 20px;">
         <div style="min-width:0;">
           <label class="form-label" style="font-size:13px; color:var(--text-muted); display:block; margin-bottom:6px; padding:0; border:none; background:transparent;">航班/車次</label>
@@ -469,10 +470,20 @@
             <span>地圖</span>
           </button>` : '';
 
+        // ✨ 判斷邏輯：有填寫 mapQuery 就優先使用，否則退回使用 name
+        const mapSearchTerm = place.mapQuery ? place.mapQuery : place.name;
+
+        const mapBtn = (!isEditMode && place.name) ? `
+          <button class="map-toggle-badge" onclick="toggleMap(this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            <span>地圖</span>
+          </button>` : '';
+
+        // 🗺️ 地圖本體 (現在是塞入 mapSearchTerm)
         const embeddedMapHtml = (!isEditMode && place.name) ? `
           <div class="embedded-map">
             <iframe loading="lazy" width="100%" height="110" frameborder="0" style="border:0" 
-              src="https://maps.google.com/maps?q=${encodeURIComponent(place.name)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
+              src="https://maps.google.com/maps?q=${encodeURIComponent(mapSearchTerm)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
             </iframe>
           </div>` : '';
 
@@ -498,6 +509,10 @@
             
             <div class="url-edit-group">
                <input type="text" class="url-input" placeholder="名稱 (會自動生成地圖)..." value="${place.name || ''}" onchange="updateVal('${place.id}', 'name', this.value)">
+               
+               <!-- ✨ 新增：編輯模式下可以隨時修改精準地址 -->
+               <input type="text" class="url-input" placeholder="精準地址 (修復地圖用)..." value="${place.mapQuery || ''}" onchange="updateVal('${place.id}', 'mapQuery', this.value)">
+               
               ${(['train', 'bus', 'flight'].includes(place.type)) ? `
                  <div class="edit-row">
                     <input type="text" class="url-input" placeholder="車次/航班..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)">
@@ -551,13 +566,32 @@
       closeModal('modal-trip'); document.getElementById('trip-title').value=''; document.getElementById('trip-start').value=''; document.getElementById('trip-end').value='';
     }
 
-    function saveNewPlace() {
+   function saveNewPlace() {
       const n=document.getElementById('place-name').value; if(!n) return alert("請輸入名稱");
       const day = appData.find(t=>t.id===currentTripId).days.find(d=>d.id===currentDayId);
-      day.places.push({ id: `p_${Date.now()}`, type: selectedType, name: n, trainNo: document.getElementById('place-train-no').value, time: document.getElementById('place-time').value, refUrl: document.getElementById('place-ref').value, note: document.getElementById('place-note').value });
+      
+      // 新增 mapQuery 欄位
+      day.places.push({ 
+        id: `p_${Date.now()}`, 
+        type: selectedType, 
+        name: n, 
+        trainNo: document.getElementById('place-train-no').value, 
+        time: document.getElementById('place-time').value, 
+        refUrl: document.getElementById('place-ref').value, 
+        note: document.getElementById('place-note').value,
+        mapQuery: document.getElementById('place-map-query').value // 儲存精準地址
+      });
+      
       saveCurrentTrip(); closeModal('modal-place');
-      document.getElementById('place-name').value=''; document.getElementById('place-train-no').value=''; document.getElementById('place-time').value='';
-      document.getElementById('place-ref').value=''; document.getElementById('place-note').value=''; renderDayContent();
+      
+      document.getElementById('place-name').value=''; 
+      document.getElementById('place-train-no').value=''; 
+      document.getElementById('place-time').value='';
+      document.getElementById('place-ref').value=''; 
+      document.getElementById('place-note').value=''; 
+      document.getElementById('place-map-query').value=''; // 清空新欄位
+      
+      renderDayContent();
     }
     
     window.toggleMap = function(btn) {
