@@ -241,33 +241,37 @@
       outline: none; /* 移除瀏覽器預設的黑框 */
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* 淡淡的藍色光暈 */
     }
-    /* 地圖展開/收起按鈕 */
-    .map-toggle-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+  /* 1. 地圖按鈕改成精緻小膠囊，放在標題旁 */
+    .map-toggle-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      background: rgba(59, 130, 246, 0.1); color: var(--primary-blue);
+      border: 1px solid rgba(59, 130, 246, 0.2); cursor: pointer;
+      transition: all 0.3s ease; white-space: nowrap; height: 22px;
+    }
+    .map-toggle-badge:hover { background: rgba(59, 130, 246, 0.15); }
+    .map-toggle-badge.active { background: var(--primary-blue); color: #fff; }
+    .map-toggle-badge svg { width: 12px; height: 12px; stroke-width: 2.5px; }
+
+    /* 2. 地圖區塊改用高度與透明度動畫 */
+    .embedded-map { 
+      border-radius: 10px; 
+      overflow: hidden; 
+      margin-left: 58px; 
+      /* 動畫核心設定：初始狀態為 0 */
+      max-height: 0; 
+      opacity: 0; 
+      margin-top: 0; 
+      border: 1px solid transparent; 
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 滑順的伸展曲線 */
+    }
+    /* 3. 當加上 .show 類別時，平滑展開 */
+    .embedded-map.show {
+      max-height: 120px; /* 足夠撐開地圖的高度 */
+      opacity: 1;
       margin-top: 12px;
-      margin-left: 58px;
-      padding: 6px 14px;
-      background: rgba(255, 255, 255, 0.7);
-      color: var(--text-muted);
-      border: 1px solid var(--glass-border);
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
+      border-color: var(--glass-border);
     }
-    .map-toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.9);
-    }
-    .map-toggle-btn.active {
-      color: var(--primary-blue);
-      border-color: rgba(59, 130, 246, 0.3);
-      background: rgba(59, 130, 246, 0.08);
-    }
-    .map-toggle-btn svg { width: 14px; height: 14px; }
   </style>
 </head>
 <body>
@@ -551,17 +555,55 @@
           const info = [place.time, place.trainNo].filter(x => x).join(" ");
           if (info) transitHtml = `<div class="transit-badge">${info}</div>`;
         }
-// 🗺️ 內建地圖：加入摺疊按鈕與 lazy 延遲載入提升效能
+// 🗺️ 內建地圖按鈕 (改為小膠囊，準備安插在標題旁邊)
+        const mapBtn = (!isEditMode && place.name) ? `
+          <button class="map-toggle-badge" onclick="toggleMap(this)">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+            <span>地圖</span>
+          </button>` : '';
+
+        // 🗺️ 地圖本體 (移除了內聯樣式的 display: none，改由 CSS 動畫控制)
         const embeddedMapHtml = (!isEditMode && place.name) ? `
-          <button class="map-toggle-btn" onclick="toggleMap(this)">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-            <span>展開地圖</span>
-          </button>
-          <div class="embedded-map" style="display: none; margin-top: 8px;">
-            <iframe loading="lazy" width="100%" height="100%" frameborder="0" style="border:0" 
+          <div class="embedded-map">
+            <iframe loading="lazy" width="100%" height="110" frameborder="0" style="border:0" 
               src="https://maps.google.com/maps?q=${encodeURIComponent(place.name)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
             </iframe>
           </div>` : '';
+
+        // 重新排版標題區，將 mapBtn 塞進去
+        container.innerHTML += `
+          <div class="place-card glass-panel" style="animation-delay: ${index*0.08}s" data-id="${place.id}">
+            <div class="place-header">
+              <div class="place-title">
+                <div class="icon-box type-${place.type || 'spot'}">${typeIcon}</div>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="font-size: 16px; line-height:1.2;">${place.name}</div>
+                    ${mapBtn}
+                  </div>
+                  ${transitHtml}
+                </div>
+              </div>
+              <div class="link-group">
+                ${refLink}
+                <div class="drag-handle edit-only" style="cursor:grab; padding:4px; color:var(--text-light);">${icons.drag}</div>
+                <button class="action-icon danger edit-only" onclick="deletePlace('${place.id}')">${icons.trash}</button>
+              </div>
+            </div>
+            
+            <div class="url-edit-group">
+               <input type="text" class="url-input" placeholder="名稱 (會自動生成地圖)..." value="${place.name || ''}" onchange="updateVal('${place.id}', 'name', this.value)">
+${(['train', 'bus', 'flight'].includes(place.type)) ? `
+   <div class="edit-row">
+      <input type="text" class="url-input" placeholder="車次/航班..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)">
+      <input type="time" class="url-input" value="${place.time || ''}" onchange="updateVal('${place.id}', 'time', this.value)">
+   </div>
+` : ''}
+               <input type="text" class="url-input" placeholder="參考網址 (時刻表/官網)..." value="${place.refUrl || ''}" onchange="updateVal('${place.id}', 'refUrl', this.value)">
+            </div>
+            <textarea class="note-area" placeholder="${isEditMode ? '點此新增備註...' : ''}" oninput="${resizeScript}" onchange="updateVal('${place.id}', 'note', this.value)" ${readonlyAttr} style="display: ${!isEditMode && !place.note ? 'none' : 'block'}">${place.note}</textarea>
+            ${embeddedMapHtml}
+          </div>`;
 
         container.innerHTML += `
           <div class="place-card glass-panel" style="animation-delay: ${index*0.08}s" data-id="${place.id}">
@@ -668,21 +710,23 @@ ${(['train', 'bus', 'flight'].includes(place.type)) ? `
       document.getElementById('place-ref').value=''; document.getElementById('place-note').value='';
       renderDayContent();
     }
-// 👇 把展開/收起地圖的切換邏輯貼在這裡 👇
+// 展開/收起地圖的切換邏輯 (結合 CSS 平滑動畫)
     window.toggleMap = function(btn) {
-      const mapDiv = btn.parentElement.querySelector('.embedded-map');
+      const card = btn.closest('.place-card'); // 鎖定當前點擊的這張卡片
+      const mapDiv = card.querySelector('.embedded-map');
       const span = btn.querySelector('span');
       
       if (!mapDiv) return;
 
-      if (mapDiv.style.display === 'none' || mapDiv.style.display === '') {
-        mapDiv.style.display = 'block';
-        span.innerText = '收起地圖';
-        btn.classList.add('active');
-      } else {
-        mapDiv.style.display = 'none';
-        span.innerText = '展開地圖';
+      // 透過切換 show 這個 class 來觸發 CSS 的展開/收起動畫
+      if (mapDiv.classList.contains('show')) {
+        mapDiv.classList.remove('show');
         btn.classList.remove('active');
+        span.innerText = '地圖';
+      } else {
+        mapDiv.classList.add('show');
+        btn.classList.add('active');
+        span.innerText = '收起';
       }
     };
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW failed: ', err)); }); }
