@@ -45,7 +45,12 @@
 
     .btn { background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.25s; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
     .btn:active { transform: scale(0.97); }
-    .btn-outline { background-color: rgba(255,255,255,0.6); color: var(--text-main); border: 1px dashed var(--text-muted); }
+    .btn-outline { 
+      background-color: rgba(255, 255, 255, 0.4); 
+      color: var(--text-main); 
+      border: 1px dashed rgba(148, 163, 184, 0.6); 
+      box-shadow: none !important; /* 強制覆蓋 .btn 原本的陰影 */
+    }
     .btn-danger-outline { background-color: transparent; color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.4); width: 100%; padding: 12px; border-radius: var(--radius-sm); margin-top: 32px; cursor: pointer; font-family: inherit; }
 
     .icon-btn { background: transparent; border: none; color: var(--text-main); padding: 8px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
@@ -88,11 +93,49 @@
     .project-info p { margin: 0; font-size: 13px; color: var(--text-muted); }
 
     .date-scroll-wrapper { background: rgba(248, 250, 252, 0.75); position: sticky; top: 64px; z-index: 40; backdrop-filter: blur(20px); margin: -24px -20px 0 -20px; padding: 12px 0 0 0; border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
-    .date-tabs { display: flex; overflow-x: auto; gap: 12px; padding: 8px 20px 16px 20px; scrollbar-width: none; }
+    .date-tabs { 
+      display: flex; 
+      overflow-x: auto; 
+      gap: 12px; 
+      padding: 16px 20px 16px 20px; 
+      scrollbar-width: none; 
+    }
     .date-tabs::-webkit-scrollbar { display: none; }
-    .date-tab { flex-shrink: 0; white-space: nowrap; padding: 10px 20px; border-radius: 999px; background: rgba(255,255,255,0.6); color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--glass-border); opacity: 0; animation: popIn 0.4s forwards; display: flex; align-items: center; gap: 6px; }
-    .date-tab.active { background-color: rgba(255,255,255,0.95); color: var(--primary); border-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
+    /* 2. 日期膠囊：加上淡淡的質感邊框與轉場效果 */
+    .date-tab { 
+      flex-shrink: 0; 
+      white-space: nowrap; 
+      padding: 10px 20px; 
+      border-radius: 999px; 
+      background: rgba(255, 255, 255, 0.6); 
+      color: var(--text-muted); 
+      font-size: 13px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      border: 1px solid rgba(148, 163, 184, 0.35); /* 淡淡的灰藍色邊框 */
+      opacity: 0; 
+      animation: popIn 0.4s forwards; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      transition: all 0.2s ease;
+    }
+
+    /* 作用中的日期膠囊：邊框與文字透出淡淡的藍色 */
+    .date-tab.active { 
+      background-color: rgba(255, 255, 255, 0.95); 
+      color: var(--primary-blue); 
+      border-color: rgba(59, 130, 246, 0.4); 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+    }
+
+    /* 3. 日期列的「+ 新增一天」：設定為虛線且無陰影 */
+    .date-tab.add-btn {
+      background: transparent;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      box-shadow: none;
+    }
     .day-content { padding-top: 32px; padding-bottom: 80px;}
     .place-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative; opacity: 0; animation: slideInUp 0.5s forwards; }
     
