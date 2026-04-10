@@ -157,7 +157,11 @@
     body.is-editing textarea.note-area { background-color: rgba(255,255,255,0.6); border-color: var(--glass-border); padding: 12px; border-radius: var(--radius-sm); min-height: 80px; color: var(--text-main); margin-top: 12px; }
     .url-input { display: none; width: 100%; border: 1px solid var(--glass-border); background-color: rgba(255,255,255,0.6); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; box-sizing: border-box; }
     body.is-editing .url-input { display: block; }
-
+    /* 讓隱形的拖曳把手現出原形 */
+    .drag-handle svg {
+      width: 22px;
+      height: 22px;
+    }
     /* Modal */
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .modal-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
