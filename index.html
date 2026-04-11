@@ -251,7 +251,16 @@
       transform: scale(1.02);
       cursor: grabbing !important;
     }
-    
+    /* --- 交通方式專屬：無邊界節點設計 --- */
+    .place-card.transit-mode {
+      background: transparent;
+      /* ✨ 關鍵修復：加上 1px 的透明邊框撐住版面，讓線條 100% 精準對齊景點卡片！ */
+      border: 1px solid transparent; 
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 8px 20px; /* 縮小上下間距，讓它更像一個小巧的連接詞 */
+    }
     /* 編輯模式下，稍微給一點底色讓輸入框好辨識 */
     body.is-editing .place-card.transit-mode {
       background: rgba(255, 255, 255, 0.4);
