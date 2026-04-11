@@ -132,15 +132,39 @@
     .day-content { padding-top: 32px; padding-bottom: 80px;}
     .place-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative; opacity: 0; animation: slideInUp 0.5s forwards; }
     
-    .place-card::after { 
-      content: ''; 
-      position: absolute; 
-      top: calc(100% + 1px); 
-      left: 41px; 
-      width: 2px; 
-      height: 14px; 
-      background: rgba(148, 163, 184, 0.5); 
-      z-index: 1; 
+    /* --- 統一的連接線邏輯（解決重疊變深色的問題） --- */
+    
+    /* 1. 徹底關閉舊版向下的線，避免重疊 */
+    .place-card::after { display: none !important; }
+
+    /* 2. 只要卡片前面還有別的卡片，就往上伸出一條 16px 的線接起來 */
+    .place-card + .place-card::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: 41px;
+      width: 2px;
+      height: 16px;
+      background: rgba(148, 163, 184, 0.5);
+      z-index: 0;
+    }
+
+    /* 3. 交通卡片特例：線條不只要往上接，還要貫穿自己到底部 */
+    .place-card.transit-mode::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      bottom: 0;    /* 貫穿到卡片最底端 */
+      height: auto; /* 覆蓋掉上面的 16px 高度限制 */
+      left: 41px;
+      width: 2px;
+      background: rgba(148, 163, 184, 0.5);
+      z-index: 0;
+    }
+
+    /* 4. 防呆機制：如果第一張就是交通卡片，上面就不准凸線條出來 */
+    .place-card.transit-mode:first-child::before {
+      top: 16px; 
     }
     .place-card:last-child::after { display: none; }
 
@@ -226,15 +250,6 @@
       box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15) !important;
       transform: scale(1.02);
       cursor: grabbing !important;
-    }
-    /* --- 交通方式專屬：無邊界節點設計 --- */
-    .place-card.transit-mode {
-      background: transparent;
-      border-color: transparent;
-      box-shadow: none;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      padding: 8px 20px; /* 縮小上下間距，讓它更像連接詞 */
     }
     
     /* 編輯模式下，稍微給一點底色讓輸入框好辨識 */
@@ -380,6 +395,7 @@
   <script>
     let appData = []; let currentTripId = null; let currentDayId = null; let isEditMode = false; let selectedType = 'spot';
     let currentUser = null; let dbUnsubscribe = null; let sortableInstance = null;
+    let previousDataString = ""; // ✨ 新增：用來記錄本地資料，防止重複渲染閃爍
 
     const icons = {
       flight: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.25c-1.243 0-2.25 1.007-2.25 2.25v6L3 14.25v2.25l6.75-2.25v4.5l-2.25 1.5v1.5l4.5-1.125 4.5 1.125v-1.5l-2.25-1.5v-4.5l6.75 2.25v-2.25l-6.75-3.75V4.5c0-1.243-1.007-2.25-2.25-2.25z"/></svg>',
@@ -433,30 +449,41 @@
 
         if (dbUnsubscribe) dbUnsubscribe();
         
+        // ✨ 新架構：監聽行程變化，並加入防閃爍過濾機制
         dbUnsubscribe = db.collection("trips").where("members", "array-contains", user.uid).onSnapshot((snapshot) => {
-          appData = [];
-          snapshot.forEach(doc => { appData.push({ id: doc.id, ...doc.data() }); });
+          let newAppData = [];
+          snapshot.forEach(doc => { 
+            let data = doc.data();
+            if(data.lastUpdated) delete data.lastUpdated; // 排除時間戳記干擾
+            newAppData.push({ id: doc.id, ...data }); 
+          });
+
+          // ✨ 核心防閃爍魔法：如果雲端抓下來的資料跟本地一模一樣，就不要重新渲染畫面！
+          const newDataString = JSON.stringify(newAppData);
+          if (newDataString === previousDataString) return; 
+
+          appData = newAppData;
+          previousDataString = newDataString; // 更新紀錄
+
           renderProjectList();
           if (currentTripId) { renderDateTabs(); renderDayContent(); }
         });
-      } else {
-        document.getElementById('btn-login').style.display = 'block';
-        document.getElementById('user-avatar').style.display = 'none';
-        document.getElementById('login-prompt').style.display = 'block';
-        if (dbUnsubscribe) dbUnsubscribe();
-        appData = [];
-        goBack(); 
-        renderProjectList();
-      }
-    });
 
     function loginGoogle() { auth.signInWithPopup(provider).catch(err => alert("登入失敗: " + err.message)); }
     function logout() { if(confirm("確定要登出行程管理嗎？")) auth.signOut(); }
 
+    // 更新單一專案的儲存邏輯 (取代原本存整包的 saveData)
     function saveCurrentTrip() { 
       if (!currentUser || !currentTripId) return;
       const trip = appData.find(t => t.id === currentTripId);
-      if (trip) { db.collection("trips").doc(currentTripId).set(trip, { merge: true }); }
+      if (trip) { 
+        // ✨ 存檔前先拍照記錄目前的狀態，這樣雲端回傳時系統就知道「這是我自己改的」
+        let appDataCopy = JSON.parse(JSON.stringify(appData));
+        appDataCopy.forEach(t => { if(t.lastUpdated) delete t.lastUpdated; });
+        previousDataString = JSON.stringify(appDataCopy);
+
+        db.collection("trips").doc(currentTripId).set(trip, { merge: true }); 
+      }
     }
 
     function setPlaceType(type) {
@@ -608,7 +635,7 @@
           onEnd: function (evt) {
             const item = day.places.splice(evt.oldIndex, 1)[0];
             day.places.splice(evt.newIndex, 0, item);
-            saveCurrentTrip(); renderDayContent(); 
+            saveCurrentTrip(); 
           }
         });
       }
