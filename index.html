@@ -448,8 +448,7 @@
         }
 
         if (dbUnsubscribe) dbUnsubscribe();
-        
-        // ✨ 新架構：監聽行程變化，並加入防閃爍過濾機制
+  // ✨ 新架構：監聽行程變化，並加入防閃爍過濾機制
         dbUnsubscribe = db.collection("trips").where("members", "array-contains", user.uid).onSnapshot((snapshot) => {
           let newAppData = [];
           snapshot.forEach(doc => { 
@@ -467,8 +466,9 @@
 
           renderProjectList();
           if (currentTripId) { renderDateTabs(); renderDayContent(); }
-        });
-      } else {
+        }); // <-- 這裡是 dbUnsubscribe 的結尾
+
+      } else { // <-- 這是 if (user) 的結尾，並接上 else
         // 尚未登入的狀態處理
         document.getElementById('btn-login').style.display = 'block';
         document.getElementById('user-avatar').style.display = 'none';
@@ -478,11 +478,11 @@
         goBack(); 
         renderProjectList();
       }
-    });
-    
+    }); // <-- 這是 auth.onAuthStateChanged 的結尾
+
     function loginGoogle() { auth.signInWithPopup(provider).catch(err => alert("登入失敗: " + err.message)); }
     function logout() { if(confirm("確定要登出行程管理嗎？")) auth.signOut(); }
-
+    
     // 更新單一專案的儲存邏輯 (取代原本存整包的 saveData)
     function saveCurrentTrip() { 
       if (!currentUser || !currentTripId) return;
