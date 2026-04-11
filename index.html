@@ -227,6 +227,61 @@
       transform: scale(1.02);
       cursor: grabbing !important;
     }
+    /* --- 交通方式專屬：無邊界節點設計 --- */
+    .place-card.transit-mode {
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      padding: 8px 20px; /* 縮小上下間距，讓它更像連接詞 */
+    }
+    
+    /* 編輯模式下，稍微給一點底色讓輸入框好辨識 */
+    body.is-editing .place-card.transit-mode {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+    }
+
+    /* 交通圖示縮小，變成實心的連接節點 */
+    .place-card.transit-mode .icon-box {
+      width: 32px;
+      height: 32px;
+      margin-left: 6px; /* 對齊原本 44px 的中心線 */
+      background: rgba(248, 250, 252, 0.9) !important; /* 模擬網頁底色並加上微模糊 */
+      backdrop-filter: blur(8px);
+      border: 2px solid currentColor !important;
+      z-index: 2;
+    }
+    .place-card.transit-mode .icon-box svg { 
+      width: 16px; 
+      height: 16px; 
+      stroke-width: 2px; 
+    }
+
+    /* 文字變小變灰，呈現附屬資訊感 */
+    .place-card.transit-mode .name-text {
+      font-size: 14px !important;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* 關鍵魔法：貫穿交通卡片的背景連接線 */
+    .place-card.transit-mode::before {
+      content: '';
+      position: absolute;
+      top: -16px; /* 往上連接前一張卡片 */
+      bottom: 0;  /* 往下連接本身的 ::after */
+      left: 41px;
+      width: 2px;
+      background: rgba(148, 163, 184, 0.5);
+      z-index: 0;
+    }
+    
+    /* 如果它是第一張，上面不要凸出線條 */
+    .place-card.transit-mode:first-child::before {
+      top: 16px;
+    }
   </style>
 </head>
 <body>
@@ -481,23 +536,27 @@
         const typeIcon = icons[place.type || 'spot'];
         const refLink = (!isEditMode && place.refUrl) ? `<a href="${place.refUrl}" target="_blank" class="nav-circle-btn ref">${icons.link}</a>` : '';
         
+        // ✨ 自動判斷是否為交通手段
+        const isTransit = ['train', 'bus', 'flight'].includes(place.type);
+        const cardClass = isTransit ? 'transit-mode' : 'glass-panel';
+
         let transitHtml = "";
-        if (['train', 'bus', 'flight'].includes(place.type)) {
+        if (isTransit) {
           const info = [place.time, place.trainNo].filter(x => x).join(" ");
           if (info) transitHtml = `<div class="transit-badge">${info}</div>`;
         }
 
-        const mapBtn = (!isEditMode && place.name) ? `
+        const mapSearchTerm = place.mapQuery ? place.mapQuery : place.name;
+
+        // ✨ 交通手段不需要地圖按鈕，讓畫面更乾淨
+        const mapBtn = (!isEditMode && place.name && !isTransit) ? `
           <button class="map-toggle-badge" onclick="toggleMap(this)">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
             <span>地圖</span>
           </button>` : '';
 
-        // ✨ 判斷邏輯：有填寫 mapQuery 就優先使用，否則退回使用 name
-        const mapSearchTerm = place.mapQuery ? place.mapQuery : place.name;
-
-        // 🗺️ 地圖本體 (現在是塞入 mapSearchTerm)
-        const embeddedMapHtml = (!isEditMode && place.name) ? `
+        // 交通手段也不產生 iframe 區塊
+        const embeddedMapHtml = (!isEditMode && place.name && !isTransit) ? `
           <div class="embedded-map">
             <iframe loading="lazy" width="100%" height="110" frameborder="0" style="border:0" 
               src="https://maps.google.com/maps?q=${encodeURIComponent(mapSearchTerm)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
@@ -505,13 +564,13 @@
           </div>` : '';
 
         container.innerHTML += `
-          <div class="place-card glass-panel" style="animation-delay: ${index*0.08}s" data-id="${place.id}">
+          <div class="place-card ${cardClass}" style="animation-delay: ${index*0.08}s" data-id="${place.id}">
             <div class="place-header">
               <div class="place-title">
                 <div class="icon-box type-${place.type || 'spot'}">${typeIcon}</div>
                 <div style="display:flex; flex-direction:column; gap:4px;">
                   <div style="display:flex; align-items:center; gap:8px;">
-                    <div style="font-size: 16px; line-height:1.2;">${place.name}</div>
+                    <div class="name-text" style="font-size: 16px; line-height:1.2;">${place.name}</div>
                     ${mapBtn}
                   </div>
                   ${transitHtml}
@@ -526,11 +585,8 @@
             
             <div class="url-edit-group">
                <input type="text" class="url-input" placeholder="名稱 (會自動生成地圖)..." value="${place.name || ''}" onchange="updateVal('${place.id}', 'name', this.value)">
-               
-               <!-- ✨ 新增：編輯模式下可以隨時修改精準地址 -->
                <input type="text" class="url-input" placeholder="精準地址 (修復地圖用)..." value="${place.mapQuery || ''}" onchange="updateVal('${place.id}', 'mapQuery', this.value)">
-               
-              ${(['train', 'bus', 'flight'].includes(place.type)) ? `
+              ${isTransit ? `
                  <div class="edit-row">
                     <input type="text" class="url-input" placeholder="車次/航班..." value="${place.trainNo || ''}" onchange="updateVal('${place.id}', 'trainNo', this.value)">
                     <input type="time" class="url-input" value="${place.time || ''}" onchange="updateVal('${place.id}', 'time', this.value)">
@@ -548,18 +604,11 @@
       if (sortableInstance) sortableInstance.destroy();
       if (isEditMode) {
         sortableInstance = new Sortable(container, {
-          animation: 250, // 稍微拉長動畫時間，交換位置時會更滑順
-          handle: '.drag-handle',
-          ghostClass: 'sortable-ghost',
-          dragClass: 'sortable-drag',
-          forceFallback: true, // 強制關閉瀏覽器難用的原生拖曳，改用套件模擬，解決電腦不能拖的問題
-          fallbackOnBody: true, // 確保拖曳中的卡片不會被其他視窗元件裁切或遮擋
-          swapThreshold: 0.65, // 讓兩張卡片交換的觸發點更直覺
+          animation: 250, handle: '.drag-handle', ghostClass: 'sortable-ghost', dragClass: 'sortable-drag', forceFallback: true, fallbackOnBody: true, swapThreshold: 0.65,
           onEnd: function (evt) {
             const item = day.places.splice(evt.oldIndex, 1)[0];
             day.places.splice(evt.newIndex, 0, item);
-            saveCurrentTrip(); 
-            renderDayContent(); 
+            saveCurrentTrip(); renderDayContent(); 
           }
         });
       }
