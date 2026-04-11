@@ -208,6 +208,25 @@
     .embedded-map.show {
       max-height: 120px; opacity: 1; margin-top: 12px; border-color: var(--glass-border);
     }
+    /* --- 拖曳體驗優化 --- */
+    /* 1. 解決手機版拖曳時畫面跟著捲動的衝突 */
+    .drag-handle {
+      touch-action: none; /* 關鍵：手指碰到這裡時，禁止網頁捲動 */
+      -webkit-user-select: none;
+      user-select: none; /* 防止不小心反白到旁邊的文字 */
+    }
+    .drag-handle:active {
+      cursor: grabbing; /* 按下時變成抓取的游標 */
+    }
+    
+    /* 2. 拖曳中卡片的視覺回饋（讓它有浮起來的感覺） */
+    .sortable-drag {
+      opacity: 1 !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15) !important;
+      transform: scale(1.02);
+      cursor: grabbing !important;
+    }
   </style>
 </head>
 <body>
@@ -529,11 +548,18 @@
       if (sortableInstance) sortableInstance.destroy();
       if (isEditMode) {
         sortableInstance = new Sortable(container, {
-          animation: 150, handle: '.drag-handle', ghostClass: 'sortable-ghost',
+          animation: 250, // 稍微拉長動畫時間，交換位置時會更滑順
+          handle: '.drag-handle',
+          ghostClass: 'sortable-ghost',
+          dragClass: 'sortable-drag',
+          forceFallback: true, // 強制關閉瀏覽器難用的原生拖曳，改用套件模擬，解決電腦不能拖的問題
+          fallbackOnBody: true, // 確保拖曳中的卡片不會被其他視窗元件裁切或遮擋
+          swapThreshold: 0.65, // 讓兩張卡片交換的觸發點更直覺
           onEnd: function (evt) {
             const item = day.places.splice(evt.oldIndex, 1)[0];
             day.places.splice(evt.newIndex, 0, item);
-            saveCurrentTrip(); renderDayContent(); 
+            saveCurrentTrip(); 
+            renderDayContent(); 
           }
         });
       }
