@@ -132,36 +132,36 @@
     .day-content { padding-top: 32px; padding-bottom: 80px;}
     .place-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative; opacity: 0; animation: slideInUp 0.5s forwards; }
     
-    /* --- 統一的連接線邏輯（解決重疊變深色的問題） --- */
+/* --- 統一的連接線邏輯（終極防斷層版） --- */
     
     /* 1. 徹底關閉舊版向下的線，避免重疊 */
     .place-card::after { display: none !important; }
 
-    /* 2. 只要卡片前面還有別的卡片，就往上伸出線條接起來 */
+    /* 2. 所有卡片往上接的線：改用實心色，並多伸長 2px 吃掉小數點誤差 */
     .place-card + .place-card::before {
       content: '';
       position: absolute;
-      top: -17px;    /* 魔法參數：跨過自己的 1px 邊框 + 16px margin */
+      top: -18px;    /* 故意往上多伸長 2px */
       left: 41px;
       width: 2px;
-      height: 16px;  /* 剛好填滿間距，一分不差，絕不刺穿上一張卡片 */
-      background: rgba(148, 163, 184, 0.5);
+      height: 18px;  /* 高度也多 2px，保證完美塞滿 16px 的 margin */
+      background: #cbd5e1; /* ✨ 改用實心質感灰，肉眼看跟原本一樣，但重疊不會變色 */
       z-index: 0;
     }
 
-    /* 3. 交通卡片特例：線條不只要往上接，還要貫穿自己到底部 */
+    /* 3. 交通卡片特例：往下大幅度貫穿，反正背景透明不怕穿幫 */
     .place-card.transit-mode::before {
       content: '';
       position: absolute;
-      top: -17px;
-      bottom: -1px;  /* 踩到外框的絕對底端，把原本流失的 1px 空隙補滿 */
+      top: -18px;    
+      bottom: -10px; /* ✨ 往下大幅度伸長，徹底消除下方斷層 */
       height: auto; 
       left: 41px;
       width: 2px;
-      background: rgba(148, 163, 184, 0.5);
+      background: #cbd5e1; /* 同樣使用實心質感灰 */
       z-index: 0;
     }
-    
+
     /* 4. 防呆機制：如果第一張就是交通卡片，上面就不准凸線條出來 */
     .place-card.transit-mode:first-child::before {
       top: 16px; 
