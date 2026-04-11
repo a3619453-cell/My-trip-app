@@ -468,7 +468,18 @@
           renderProjectList();
           if (currentTripId) { renderDateTabs(); renderDayContent(); }
         });
-
+      } else {
+        // 尚未登入的狀態處理
+        document.getElementById('btn-login').style.display = 'block';
+        document.getElementById('user-avatar').style.display = 'none';
+        document.getElementById('login-prompt').style.display = 'block';
+        if (dbUnsubscribe) dbUnsubscribe();
+        appData = [];
+        goBack(); 
+        renderProjectList();
+      }
+    });
+    
     function loginGoogle() { auth.signInWithPopup(provider).catch(err => alert("登入失敗: " + err.message)); }
     function logout() { if(confirm("確定要登出行程管理嗎？")) auth.signOut(); }
 
