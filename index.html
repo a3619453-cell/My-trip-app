@@ -22,7 +22,7 @@
     /* 極簡美學 - 玻璃擬態 */
     :root {
       --text-main: #1e293b; --text-muted: #64748b; --text-light: #94a3b8;
-      --primary: #0f172a; --primary-blue: #3b82f6; --danger: #ef4444;
+      --primary: #0f172a; --primary-blue: #3b82f6; --travel-accent: #ff385c; --travel-ink: #222222; --danger: #ef4444;
       --radius-lg: 20px; --radius-md: 16px; --radius-sm: 10px;
       --glass-bg: rgba(255, 255, 255, 0.65); --glass-border: rgba(255, 255, 255, 0.8);
       --glass-shadow: 0 8px 30px rgba(15, 23, 42, 0.04); --glass-blur: 20px;
@@ -102,10 +102,20 @@
 
     header { background: rgba(248, 250, 252, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; height: 64px; border-bottom: 1px solid rgba(255, 255, 255, 0.5); gap: 8px;}
     .header-title { font-size: 17px; font-weight: 600; margin: 0; flex-grow: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .edit-banner {
+      display: none; align-items: center; justify-content: center; gap: 8px;
+      margin: 0 -20px; padding: 9px 20px; background: rgba(255, 56, 92, 0.08);
+      color: var(--travel-ink); border-bottom: 1px solid rgba(255, 56, 92, 0.18);
+      font-size: 12px; font-weight: 700; letter-spacing: 0;
+    }
+    .edit-banner::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--travel-accent); }
+    body.is-editing .edit-banner { display: flex; }
 
     .project-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; opacity: 0; animation: slideInUp 0.5s forwards; }
     .project-info h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: 600; }
     .project-info p { margin: 0; font-size: 13px; color: var(--text-muted); }
+    .project-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .project-meta span { padding: 4px 8px; border-radius: 999px; background: rgba(15, 23, 42, 0.04); color: var(--text-muted); font-size: 12px; font-weight: 600; }
 
     /* 修改日期區塊：移除底線，加上漸層羽化遮罩 */
     .date-scroll-wrapper {
@@ -126,11 +136,16 @@
     .date-tabs::-webkit-scrollbar { display: none; }
 
     .date-tab { flex-shrink: 0; white-space: nowrap; padding: 10px 20px; border-radius: 999px; background: rgba(255, 255, 255, 0.6); color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(148, 163, 184, 0.35); opacity: 0; animation: popIn 0.4s forwards; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease; }
-    .date-tab.active { background-color: rgba(255, 255, 255, 0.95); color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+    .date-tab.active { background-color: rgba(255, 255, 255, 0.95); color: var(--travel-accent); border-color: rgba(255, 56, 92, 0.34); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
     .date-tab.add-btn { background: transparent; border: 1px dashed rgba(148, 163, 184, 0.6); box-shadow: none; }
+    .date-tab .weekday { opacity: 0.72; font-size: 11px; }
 
     .day-content { padding-top: 32px; padding-bottom: 80px;}
+    body.is-editing .day-content { padding-bottom: 168px; }
     .place-card { border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; position: relative; opacity: 0; animation: slideInUp 0.5s forwards; }
+    .empty-day { text-align: center; padding: 44px 22px; border: 1px dashed rgba(148, 163, 184, 0.5); border-radius: var(--radius-md); color: var(--text-muted); background: rgba(255,255,255,0.42); }
+    .empty-day h3 { margin: 0 0 8px 0; color: var(--text-main); font-size: 17px; font-weight: 700; }
+    .empty-day p { margin: 0 0 18px 0; font-size: 13px; line-height: 1.5; }
 
     /* --- 統一的連接線邏輯（防斷層版） --- */
     .place-card::after { display: none !important; }
@@ -210,12 +225,12 @@
     .map-toggle-badge {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
-      background: rgba(59, 130, 246, 0.1); color: var(--primary-blue);
-      border: 1px solid rgba(59, 130, 246, 0.2); cursor: pointer;
+      background: rgba(255, 56, 92, 0.1); color: var(--travel-accent);
+      border: 1px solid rgba(255, 56, 92, 0.2); cursor: pointer;
       transition: all 0.3s ease; white-space: nowrap; height: 22px;
     }
-    .map-toggle-badge:hover { background: rgba(59, 130, 246, 0.15); }
-    .map-toggle-badge.active { background: var(--primary-blue); color: #fff; }
+    .map-toggle-badge:hover { background: rgba(255, 56, 92, 0.15); }
+    .map-toggle-badge.active { background: var(--travel-accent); color: #fff; }
     .map-toggle-badge svg { width: 12px; height: 12px; stroke-width: 2.5px; }
 
     .embedded-map {
@@ -224,8 +239,20 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .embedded-map.show {
-      max-height: 120px; opacity: 1; margin-top: 12px; border-color: var(--glass-border);
+      max-height: 190px; opacity: 1; margin-top: 12px; border-color: var(--glass-border);
     }
+    .edit-action-bar {
+      display: none; position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
+      width: min(760px, 100%); padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(248, 250, 252, 0.88); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      border-top: 1px solid rgba(148, 163, 184, 0.22); z-index: 80;
+      box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.08);
+    }
+    body.is-editing .edit-action-bar { display: block; }
+    .edit-action-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+    .edit-action-row .btn { min-height: 48px; border-radius: 999px; background: var(--travel-accent); box-shadow: 0 10px 22px rgba(255, 56, 92, 0.22); }
+    .delete-day-btn { width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(239, 68, 68, 0.22); background: rgba(255,255,255,0.72); color: var(--danger); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .delete-day-btn svg { width: 18px; height: 18px; }
     /* --- 拖曳體驗優化 --- */
     /* 1. 解決手機版拖曳時畫面跟著捲動的衝突 */
     .drag-handle {
@@ -319,10 +346,17 @@
         </button>
       </div>
     </header>
+    <div class="edit-banner">編輯模式已開啟，可以拖曳排序與修改內容</div>
     <div class="date-scroll-wrapper"><div class="date-tabs" id="date-tabs-container"></div></div>
     <div class="day-content" id="day-content-container"></div>
-    <button class="btn btn-outline edit-only edit-only-block" style="width: 100%; padding: 14px; margin-bottom: 16px;" onclick="openModal('modal-place')">新增景點或交通</button>
-    <button class="btn-danger-outline edit-only edit-only-block" style="margin-top:0;" onclick="removeCurrentDay()">刪除此天行程</button>
+    <div class="edit-action-bar">
+      <div class="edit-action-row">
+        <button class="btn" onclick="openModal('modal-place')">新增景點或交通</button>
+        <button class="delete-day-btn" onclick="removeCurrentDay()" title="刪除此天行程">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="modal-trip">
@@ -455,6 +489,26 @@
       }
     }
 
+    function countTripPlaces(trip) {
+      return (trip.days || []).reduce((total, day) => total + ((day.places || []).length), 0);
+    }
+
+    function getTripStartYear(trip) {
+      const startDate = String(trip?.dateRange || '').split(' 至 ')[0];
+      const year = parseInt(startDate.split('-')[0], 10);
+      return Number.isFinite(year) ? year : new Date().getFullYear();
+    }
+
+    function getWeekdayLabel(trip, day) {
+      const parts = String(day?.date || '').split('/');
+      if (parts.length !== 2) return '';
+      const month = parseInt(parts[0], 10);
+      const date = parseInt(parts[1], 10);
+      if (!month || !date) return '';
+      const weekdayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+      return weekdayNames[new Date(getTripStartYear(trip), month - 1, date).getDay()];
+    }
+
     auth.onAuthStateChanged(async (user) => {
       currentUser = user;
       if (user) {
@@ -571,10 +625,12 @@
          return;
       }
       appData.forEach((trip, i) => {
-        const isShared = trip.members && trip.members.length > 1 ? '👥 ' : '';
+        const isShared = trip.members && trip.members.length > 1 ? '<span>共編</span>' : '';
         const title = escapeHTML(trip.title || '未命名行程');
         const dateRange = escapeHTML(trip.dateRange || '');
-        container.innerHTML += `<div class="project-card glass-panel" style="animation-delay: ${i*0.05}s"><div style="flex-grow:1; cursor:pointer;" onclick="selectTrip(${jsArg(trip.id)})"><div class="project-info"><h3>${isShared}${title}</h3><p>${dateRange}</p></div></div><button class="action-icon danger" onclick="deleteTrip(${jsArg(trip.id)})">${icons.trash}</button></div>`;
+        const dayCount = (trip.days || []).length;
+        const placeCount = countTripPlaces(trip);
+        container.innerHTML += `<div class="project-card glass-panel" style="animation-delay: ${i*0.05}s"><div style="flex-grow:1; cursor:pointer;" onclick="selectTrip(${jsArg(trip.id)})"><div class="project-info"><h3>${title}</h3><p>${dateRange}</p><div class="project-meta"><span>${dayCount} 天</span><span>${placeCount} 個項目</span>${isShared}</div></div></div><button class="action-icon danger" onclick="deleteTrip(${jsArg(trip.id)})">${icons.trash}</button></div>`;
       });
       container.innerHTML += `<button class="btn btn-outline" style="width: 100%; padding: 14px; margin-top: 8px;" onclick="openModal('modal-trip')">+ 新增行程</button>`;
     }
@@ -585,7 +641,8 @@
       if(!trip) return;
       trip.days.forEach((day, i) => {
         const tab = document.createElement('div'); tab.className = `date-tab ${day.id === currentDayId ? 'active' : ''}`;
-        tab.style.animationDelay = `${i*0.05}s`; tab.innerHTML = `<span>${escapeHTML(day.date)}</span><span style="opacity:0.6; font-size:11px;">${escapeHTML(day.label)}</span>`;
+        const weekday = getWeekdayLabel(trip, day);
+        tab.style.animationDelay = `${i*0.05}s`; tab.innerHTML = `<span>${escapeHTML(day.date)}</span><span class="weekday">${escapeHTML(weekday)}</span><span style="opacity:0.6; font-size:11px;">${escapeHTML(day.label)}</span>`;
         tab.onclick = () => { if (currentDayId === day.id) return; currentDayId = day.id; Array.from(container.querySelectorAll('.date-tab:not(.add-btn)')).forEach(t => t.classList.remove('active')); tab.classList.add('active'); renderDayContent(); tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); };
         container.appendChild(tab);
       });
@@ -598,8 +655,18 @@
       if (!trip || !currentDayId) return;
       const day = trip.days.find(d => d.id === currentDayId);
       if(!day) return;
+      const places = day.places || [];
 
-      day.places.forEach((place, index) => {
+      if (places.length === 0) {
+        container.innerHTML = `
+          <div class="empty-day">
+            <h3>這一天還沒有項目</h3>
+            <p>${isEditMode ? '先放一個景點或交通，行程線就會開始長出來。' : '開啟編輯模式後，可以新增景點、航班、列車或巴士。'}</p>
+            ${isEditMode ? "<button class=\"btn\" style=\"width:100%; min-height:48px; border-radius:999px; background:var(--travel-accent);\" onclick=\"openModal('modal-place')\">新增第一個項目</button>" : ''}
+          </div>`;
+      }
+
+      places.forEach((place, index) => {
         const readonlyAttr = isEditMode ? '' : 'readonly';
         const resizeScript = `this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';`;
 
@@ -630,7 +697,7 @@
         // 交通手段也不產生 iframe 區塊
         const embeddedMapHtml = (!isEditMode && place.name && !isTransit) ? `
           <div class="embedded-map">
-            <iframe loading="lazy" width="100%" height="110" frameborder="0" style="border:0"
+            <iframe loading="lazy" width="100%" height="178" frameborder="0" style="border:0"
               src="https://maps.google.com/maps?q=${encodeURIComponent(mapSearchTerm)}&t=&z=15&ie=UTF8&iwloc=&output=embed">
             </iframe>
           </div>` : '';
